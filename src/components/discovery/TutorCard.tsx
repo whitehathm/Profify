@@ -2,7 +2,7 @@ import type { Tutor } from '@/types';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/Button';
 import { Star, ShieldCheck, MapPin, Video } from 'lucide-react';
-import { formatCurrency } from '@/lib/format';
+import { CITIES } from '@/data/catalog';
 
 interface TutorCardProps {
   tutor: Tutor;
@@ -10,7 +10,11 @@ interface TutorCardProps {
 }
 
 export function TutorCard({ tutor, onBook }: TutorCardProps) {
-  const { lang, t } = useApp();
+  const { lang } = useApp();
+
+  // الحصول على اسم المدينة بأمان
+  const cityObj = CITIES.find((c) => c.id === tutor.cityId);
+  const cityName = cityObj ? cityObj.label[lang] : tutor.cityId;
 
   return (
     <div className="group relative flex flex-col justify-between rounded-2xl bg-white p-5 shadow-sm border border-slate-200/80 transition-all hover:shadow-md hover:border-[#6366F1]/40">
@@ -36,12 +40,14 @@ export function TutorCard({ tutor, onBook }: TutorCardProps) {
                 <span>{tutor.rating.toFixed(1)}</span>
               </div>
             </div>
-            <p className="text-xs font-medium text-slate-500 mt-0.5 truncate">{tutor.headline[lang]}</p>
+            <p className="text-xs font-medium text-slate-500 mt-0.5 truncate">
+              {tutor.headline[lang] || tutor.headline.ar}
+            </p>
             
             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
               <span className="flex items-center gap-1 bg-slate-100 px-2 py-0.5 rounded-md text-slate-700">
                 <MapPin className="h-3 w-3 text-[#6366F1]" />
-                {tutor.cityName}
+                {cityName}
               </span>
               {tutor.teachesOnline && (
                 <span className="flex items-center gap-1 bg-indigo-50 px-2 py-0.5 rounded-md text-[#6366F1] font-semibold">
@@ -53,9 +59,9 @@ export function TutorCard({ tutor, onBook }: TutorCardProps) {
           </div>
         </div>
 
-        {/* Subjects & Bio */}
+        {/* Bio */}
         <p className="mt-4 text-xs text-slate-600 line-clamp-2 leading-relaxed">
-          {tutor.bio[lang]}
+          {tutor.bio[lang] || tutor.bio.ar}
         </p>
       </div>
 
