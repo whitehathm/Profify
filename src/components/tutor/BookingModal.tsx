@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/Button';
-import { X, Calendar, Clock, Video, MapPin, CheckCircle2 } from 'lucide-react';
+import { X, Video, MapPin, CheckCircle2 } from 'lucide-react';
 
 export function BookingModal() {
   const { selectedTutorForBooking, setSelectedTutorForBooking, lang } = useApp();
@@ -12,39 +12,30 @@ export function BookingModal() {
   const labels = {
     ar: {
       title: 'حجز حصة تجريبية',
-      tutor: 'الأستاذ:',
-      priceLabel: 'سعر الحصة التجريبية:',
       method: 'طريقة الدرس:',
       online: 'عن بُعد (Online)',
       inPerson: 'حضوري',
       confirmBtn: 'تأكيد الحجز المباشر',
       successTitle: 'تم إرسال طلب الحجز بنجاح!',
-      successDesc: 'سيتم إشعار الأستاذ وتأكيد الموعد معك عبر الحساب.',
-      close: 'إغلاق',
+      successDesc: 'سيتم إشعار الأستاذ وتأكيد الموعد معك.',
     },
     fr: {
       title: 'Réserver un cours d\'essai',
-      tutor: 'Enseignant :',
-      priceLabel: 'Prix du cours d\'essai :',
       method: 'Mode de cours :',
-      online: 'En ligne (Online)',
+      online: 'En ligne',
       inPerson: 'En présence',
       confirmBtn: 'Confirmer la réservation',
-      successTitle: 'Demande envoyée avec succès !',
-      successDesc: 'L\'enseignant sera notifié pour confirmer le créneau.',
-      close: 'Fermer',
+      successTitle: 'Demande envoyée !',
+      successDesc: 'L\'enseignant sera notifié.',
     },
     en: {
       title: 'Book a Trial Lesson',
-      tutor: 'Tutor:',
-      priceLabel: 'Trial Lesson Price:',
       method: 'Lesson Mode:',
       online: 'Online',
       inPerson: 'In-Person',
       confirmBtn: 'Confirm Booking',
       successTitle: 'Booking Request Sent!',
-      successDesc: 'The tutor will be notified to confirm your time slot.',
-      close: 'Close',
+      successDesc: 'The tutor will be notified.',
     },
   }[lang || 'ar'];
 
@@ -53,7 +44,7 @@ export function BookingModal() {
     setTimeout(() => {
       setIsSuccess(false);
       setSelectedTutorForBooking(null);
-    }, 2000);
+    }, 1800);
   };
 
   return (
