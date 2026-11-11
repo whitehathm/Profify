@@ -1,4 +1,4 @@
-import { Heart, MapPin } from 'lucide-react';
+import { CalendarDays, Heart, MapPin } from 'lucide-react';
 import type { Tutor } from '@/types';
 import { cityLabel, subjectLabel } from '@/data/catalog';
 import { useApp } from '@/context/AppContext';
@@ -74,8 +74,12 @@ export function TutorCard({ tutor, index }: { tutor: Tutor; index: number }) {
             {t('currency')} {t('perHour')}
           </span>
         </p>
-        <Button size="sm" onClick={() => openModal({ type: 'profile', tutorId: tutor.id })}>
-          {t('viewProfile')}
+        <Button
+          size="sm"
+          icon={<CalendarDays className="h-4 w-4" aria-hidden="true" />}
+          onClick={() => openModal({ type: 'book', tutorId: tutor.id })}
+        >
+          {t('bookTrial')}
         </Button>
       </div>
     </article>

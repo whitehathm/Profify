@@ -89,6 +89,7 @@ export const strings = {
   chooseTime: { ar: 'اختر الساعة', fr: "Choisissez l’heure", en: 'Choose a time' },
   today: { ar: 'اليوم', fr: "Aujourd’hui", en: 'Today' },
   bookSession: { ar: 'احجز حصة', fr: 'Réserver une séance', en: 'Book a session' },
+  bookTrial: { ar: 'احجز حصة تجريبية', fr: 'Réserver un cours d’essai', en: 'Book a trial lesson' },
   contactTutor: { ar: 'تواصل مع الأستاذ', fr: 'Contacter le professeur', en: 'Contact tutor' },
   bookTitle: { ar: 'حجز حصة مع {name}', fr: 'Réserver avec {name}', en: 'Book a session with {name}' },
   bookDay: { ar: 'اليوم', fr: 'Jour', en: 'Day' },
