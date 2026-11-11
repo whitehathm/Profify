@@ -13,7 +13,7 @@ export function TutorCard({ tutor, index }: { tutor: Tutor; index: number }) {
 
   return (
     <article
-      className="group flex flex-col rounded-2xl bg-white p-5 shadow-card ring-1 ring-slate-200/70 transition duration-300 hover:-translate-y-1 hover:shadow-card-hover animate-slide-up"
+      className="group flex flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-card transition duration-300 hover:-translate-y-1 hover:border-indigo-300 hover:shadow-card-hover animate-slide-up"
       style={{ animationDelay: `${index * 60}ms` }}
     >
       <div className="flex items-start gap-4">

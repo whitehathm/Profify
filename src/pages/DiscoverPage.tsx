@@ -25,7 +25,7 @@ export function DiscoverPage() {
   }, []);
 
   const results = useMemo(() => filterTutors(tutors, filters, lang), [tutors, filters, lang]);
-  const patch = useCallback((changes: Partial<TutorFilters>) => setFilters((previous) => ({ ...previous, ...previous, ...changes })), []);
+  const patch = useCallback((changes: Partial<TutorFilters>) => setFilters((previous) => ({ ...previous, ...changes })), []);
   const reset = useCallback(() => setFilters(DEFAULT_FILTERS), []);
   const activeCount = countActiveFilters(filters);
 
