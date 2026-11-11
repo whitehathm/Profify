@@ -20,10 +20,10 @@ export default function App() {
   }, [lang]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-primary-950">
+    <div className="flex min-h-screen flex-col bg-white text-slate-900 antialiased">
       <Header />
       <DemoBar />
-      <main className="flex-1">
+      <main className="flex-1 bg-white">
         {role === 'student' ? <StudentDashboard /> : role === 'tutor' ? <TutorDashboard /> : <DiscoverPage />}
       </main>
       <Footer />
