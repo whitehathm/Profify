@@ -1,139 +1,117 @@
-import { useState, type FormEvent } from 'react';
-import type { TeachingMode } from '@/types';
+import { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/Button';
-import { Modal } from '@/components/ui/Modal';
-import { Segmented } from '@/components/ui/Segmented';
-import { ModeTag } from '@/components/ui/Badges';
-import { Field, TextInput } from '@/components/ui/Field';
-import { AvailabilityCalendar } from '@/components/tutor/AvailabilityCalendar';
-import { isValidMoroccanPhone } from '@/lib/format';
-import { CheckCircle2 } from 'lucide-react';
+import { X, Video, MapPin, CheckCircle2 } from 'lucide-react';
+import type { Tutor } from '@/types';
 
 interface BookingModalProps {
-  tutorId: string;
-  initialDate?: string;
-  initialTime?: string;
+  tutor: Tutor;
+  onClose: () => void;
 }
 
-interface BookingErrors {
-  slot?: string;
-  name?: string;
-  phone?: string;
-}
+export function BookingModal({ tutor, onClose }: BookingModalProps) {
+  const { lang } = useApp();
+  const [isSuccess, setIsSuccess] = useState(false);
 
-export function BookingModal({ tutorId, initialDate, initialTime }: BookingModalProps) {
-  const { tutors, user, t, lang, addBooking, notify, closeModal } = useApp();
-  const tutor = tutors.find((item) => item.id === tutorId);
-  const [date, setDate] = useState<string | null>(initialDate ?? null);
-  const [time, setTime] = useState<string | null>(initialTime ?? null);
-  const [mode, setMode] = useState<TeachingMode>(tutor?.modes[0] ?? 'online');
-  const [name, setName] = useState(user?.name ?? '');
-  const [phone, setPhone] = useState('');
-  const [errors, setErrors] = useState<BookingErrors>({});
-  const [sent, setSent] = useState(false);
+  const labels = {
+    ar: {
+      title: 'حجز حصة تجريبية',
+      method: 'طريقة الدرس:',
+      online: 'عن بُعد (Online)',
+      inPerson: 'حضوري',
+      confirmBtn: 'تأكيد الحجز المباشر',
+      successTitle: 'تم إرسال طلب الحجز بنجاح!',
+      successDesc: 'سيتم إشعار الأستاذ وتأكيد الموعد معك.',
+    },
+    fr: {
+      title: 'Réserver un cours d\'essai',
+      method: 'Mode de cours :',
+      online: 'En ligne',
+      inPerson: 'En présence',
+      confirmBtn: 'Confirmer la réservation',
+      successTitle: 'Demande envoyée !',
+      successDesc: 'L\'enseignant sera notifié.',
+    },
+    en: {
+      title: 'Book a Trial Lesson',
+      method: 'Lesson Mode:',
+      online: 'Online',
+      inPerson: 'In-Person',
+      confirmBtn: 'Confirm Booking',
+      successTitle: 'Booking Request Sent!',
+      successDesc: 'The tutor will be notified.',
+    },
+  }[lang || 'ar'];
 
-  if (!tutor) return null;
-
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    const nextErrors: BookingErrors = {};
-    if (!date || !time) nextErrors.slot = t('errSlot');
-    if (name.trim().length < 2) nextErrors.name = t('errName');
-    if (!isValidMoroccanPhone(phone)) nextErrors.phone = t('errPhone');
-    if (!date || !time || Object.keys(nextErrors).length > 0) {
-      setErrors(nextErrors);
-      return;
-    }
-    setErrors({});
-    addBooking({ tutorId: tutor.id, studentName: name.trim(), studentPhone: phone.trim(), date, time, mode });
-    notify(t('toastBooked'));
-    setSent(true);
+  const handleConfirm = () => {
+    setIsSuccess(true);
+    setTimeout(() => {
+      setIsSuccess(false);
+      onClose();
+    }, 1800);
   };
 
-  if (sent) {
-    return (
-      <Modal title={t('requestSentTitle')} onClose={closeModal}>
-        <div className="flex flex-col items-center py-6 text-center animate-scale-in">
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-success-50 text-success-600">
-            <CheckCircle2 className="h-9 w-9" aria-hidden="true" />
-          </span>
-          <p className="mt-5 max-w-sm text-sm leading-relaxed text-slate-700">{t('requestSentText', { name: tutor.name })}</p>
-          <Button className="mt-6" onClick={closeModal}>
-            {t('done')}
-          </Button>
-        </div>
-      </Modal>
-    );
-  }
-
   return (
-    <Modal
-      title={t('bookTitle', { name: tutor.name })}
-      onClose={closeModal}
-      size="lg"
-      footer={
-        <Button type="submit" form="booking-form" block>
-          {t('sendRequest')}
-        </Button>
-      }
-    >
-      <form id="booking-form" onSubmit={handleSubmit} noValidate className="space-y-6">
-        <div>
-          <p className="mb-3 text-sm font-semibold text-primary-950">{t('bookDay')} & {t('bookTime')}</p>
-          <AvailabilityCalendar
-            tutor={tutor}
-            date={date}
-            time={time}
-            onDateChange={(next) => {
-              setDate(next);
-              setErrors((previous) => ({ ...previous, slot: undefined }));
-            }}
-            onTimeChange={(next) => {
-              setTime(next);
-              setErrors((previous) => ({ ...previous, slot: undefined }));
-            }}
-          />
-          {errors.slot && <p className="mt-2 text-sm text-error-600">{errors.slot}</p>}
-        </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+      <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-slate-100">
+        <button
+          onClick={onClose}
+          className="absolute left-4 top-4 text-slate-400 hover:text-slate-600 rounded-lg p-1"
+        >
+          <X className="h-5 w-5" />
+        </button>
 
-        <div>
-          <p className="mb-3 text-sm font-semibold text-primary-950">{t('sessionMode')}</p>
-          {tutor.modes.length > 1 ? (
-            <Segmented
-              label={t('sessionMode')}
-              value={mode}
-              onChange={setMode}
-              options={tutor.modes.map((item) => ({
-                value: item,
-                label: t(item === 'online' ? 'modeOnline' : 'modeInPerson'),
-              }))}
-            />
-          ) : (
-            <ModeTag mode={mode} />
-          )}
-        </div>
+        {!isSuccess ? (
+          <div className="space-y-5">
+            <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">
+              {labels.title}
+            </h2>
 
-        <Field label={t('fieldName')} error={errors.name}>
-          <TextInput
-            value={name}
-            autoComplete="name"
-            onChange={(event) => setName(event.target.value)}
-            lang={lang}
-          />
-        </Field>
+            <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200/60">
+              <img
+                src={tutor.avatarUrl}
+                alt={tutor.name}
+                className="h-12 w-12 rounded-full object-cover border border-slate-200"
+              />
+              <div>
+                <h3 className="font-bold text-slate-900 text-sm">{tutor.name}</h3>
+                <p className="text-xs text-[#6366F1] font-extrabold">
+                  {tutor.hourlyRate} د.م / ساعة
+                </p>
+              </div>
+            </div>
 
-        <Field label={t('fieldPhone')} error={errors.phone} hint={t('phoneHint')}>
-          <TextInput
-            value={phone}
-            inputMode="tel"
-            autoComplete="tel"
-            dir="ltr"
-            placeholder="06XXXXXXXX"
-            onChange={(event) => setPhone(event.target.value)}
-          />
-        </Field>
-      </form>
-    </Modal>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-700 block">{labels.method}</label>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center justify-center gap-2 rounded-xl border-2 border-[#6366F1] bg-indigo-50/50 p-3 text-xs font-bold text-[#6366F1]">
+                  <Video className="h-4 w-4" />
+                  <span>{labels.online}</span>
+                </div>
+                <div className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 p-3 text-xs font-medium text-slate-600 opacity-60">
+                  <MapPin className="h-4 w-4" />
+                  <span>{labels.inPerson}</span>
+                </div>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleConfirm}
+              className="w-full bg-[#6366F1] hover:bg-[#4F46E5] text-white text-xs font-bold rounded-xl py-3 shadow-sm"
+            >
+              {labels.confirmBtn}
+            </Button>
+          </div>
+        ) : (
+          <div className="py-6 text-center space-y-3">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+              <CheckCircle2 className="h-6 w-6" />
+            </div>
+            <h3 className="text-base font-bold text-slate-900">{labels.successTitle}</h3>
+            <p className="text-xs text-slate-500">{labels.successDesc}</p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

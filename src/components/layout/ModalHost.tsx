@@ -1,21 +1,27 @@
-import { useApp } from '@/context/AppContext';
-import { TutorProfileModal } from '@/components/tutor/TutorProfileModal';
-import { BookingModal } from '@/components/tutor/BookingModal';
-import { ContactModal } from '@/components/tutor/ContactModal';
-import { AuthModal } from '@/components/auth/AuthModal';
+import { useState, useEffect } from 'react';
+import { BookingModal } from '@/components/modals/BookingModal';
+import type { Tutor } from '@/types';
 
 export function ModalHost() {
-  const { modal } = useApp();
-  if (!modal) return null;
+  const [activeTutor, setActiveTutor] = useState<Tutor | null>(null);
 
-  switch (modal.type) {
-    case 'profile':
-      return <TutorProfileModal tutorId={modal.tutorId} />;
-    case 'book':
-      return <BookingModal tutorId={modal.tutorId} initialDate={modal.date} initialTime={modal.time} />;
-    case 'contact':
-      return <ContactModal tutorId={modal.tutorId} />;
-    case 'auth':
-      return <AuthModal initialMode={modal.mode} />;
-  }
+  useEffect(() => {
+    const handleOpenModal = (event: CustomEvent<Tutor>) => {
+      setActiveTutor(event.detail);
+    };
+
+    window.addEventListener('open-booking-modal' as any, handleOpenModal as any);
+    return () => {
+      window.removeEventListener('open-booking-modal' as any, handleOpenModal as any);
+    };
+  }, []);
+
+  if (!activeTutor) return null;
+
+  return (
+    <BookingModal
+      tutor={activeTutor}
+      onClose={() => setActiveTutor(null)}
+    />
+  );
 }
