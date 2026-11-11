@@ -5,10 +5,14 @@
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
+    background-color: #ffffff !important;
   }
 
   body {
-    @apply bg-slate-50 font-sans text-primary-950 antialiased;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    font-family: 'Inter', 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
 
   html[lang='ar'] body {
@@ -16,12 +20,66 @@
   }
 
   :focus-visible {
-    outline: 2px solid #f5b62a;
+    outline: 2px solid #D54B74;
     outline-offset: 2px;
   }
 }
 
+/* Preply Style Theme Overrides */
+@layer utilities {
+  /* Override backgrounds to Pure White */
+  .bg-slate-50,
+  .bg-gray-50 {
+    background-color: #ffffff !important;
+  }
+
+  /* Override primary actions to Preply Rose Pink */
+  .bg-primary-600,
+  .bg-primary-500,
+  .bg-rose-600,
+  .bg-rose-500,
+  .bg-red-600 {
+    background-color: #D54B74 !important;
+  }
+
+  /* Text colors */
+  .text-primary-600,
+  .text-primary-500,
+  .text-rose-600,
+  .text-rose-500 {
+    color: #D54B74 !important;
+  }
+
+  /* Borders */
+  .border-primary-600,
+  .border-primary-500,
+  .border-rose-600,
+  .border-rose-500 {
+    border-color: #D54B74 !important;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+}
+
 @layer components {
+  /* Preply Style Buttons: Rose Pink background with crisp dark outline */
+  button.bg-primary-600,
+  button.bg-primary-500,
+  a.bg-primary-600,
+  a.bg-primary-500 {
+    background-color: #D54B74 !important;
+    border: 1px solid #0f172a !important;
+    border-radius: 0.75rem !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+  }
+
   .skeleton {
     @apply relative overflow-hidden rounded-lg bg-slate-200/70;
   }
@@ -33,16 +91,6 @@
     transform: translateX(-100%);
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
     animation: shimmer 1.4s infinite;
-  }
-}
-
-@layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .no-scrollbar {
-    scrollbar-width: none;
   }
 }
 
