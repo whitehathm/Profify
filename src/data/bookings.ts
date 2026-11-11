@@ -1,0 +1,53 @@
+import type { Booking } from '@/types';
+import { CURRENT_STUDENT_ID } from '@/data/catalog';
+
+export const SEED_BOOKINGS: Booking[] = [
+  {
+    id: 'b1',
+    tutorId: 't1',
+    studentId: 'guest-1',
+    studentName: 'Amine Kettani',
+    studentPhone: '0670112233',
+    date: '2026-11-14',
+    time: '17:00',
+    mode: 'online',
+    status: 'pending',
+    createdAt: '2026-11-10T18:20:00.000Z',
+  },
+  {
+    id: 'b2',
+    tutorId: 't1',
+    studentId: 'guest-2',
+    studentName: 'Sara Benjelloun',
+    studentPhone: '0660987654',
+    date: '2026-11-16',
+    time: '10:00',
+    mode: 'in_person',
+    status: 'pending',
+    createdAt: '2026-11-09T09:45:00.000Z',
+  },
+  {
+    id: 'b3',
+    tutorId: 't8',
+    studentId: CURRENT_STUDENT_ID,
+    studentName: 'Yassine',
+    studentPhone: '0611223344',
+    date: '2026-11-13',
+    time: '19:00',
+    mode: 'online',
+    status: 'accepted',
+    createdAt: '2026-11-08T12:00:00.000Z',
+  },
+  {
+    id: 'b4',
+    tutorId: 't4',
+    studentId: CURRENT_STUDENT_ID,
+    studentName: 'Yassine',
+    studentPhone: '0611223344',
+    date: '2026-11-17',
+    time: '20:00',
+    mode: 'online',
+    status: 'pending',
+    createdAt: '2026-11-10T08:30:00.000Z',
+  },
+];
