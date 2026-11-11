@@ -2,12 +2,18 @@ import { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/Button';
 import { X, Video, MapPin, CheckCircle2 } from 'lucide-react';
+import type { Tutor } from '@/types';
 
-export function BookingModal() {
-  const { selectedTutorForBooking, setSelectedTutorForBooking, lang } = useApp();
+interface BookingModalProps {
+  tutor?: Tutor | null;
+  onClose?: () => void;
+}
+
+export function BookingModal({ tutor, onClose }: BookingModalProps) {
+  const { lang } = useApp();
   const [isSuccess, setIsSuccess] = useState(false);
 
-  if (!selectedTutorForBooking) return null;
+  if (!tutor) return null;
 
   const labels = {
     ar: {
@@ -43,7 +49,7 @@ export function BookingModal() {
     setIsSuccess(true);
     setTimeout(() => {
       setIsSuccess(false);
-      setSelectedTutorForBooking(null);
+      if (onClose) onClose();
     }, 1800);
   };
 
@@ -51,7 +57,7 @@ export function BookingModal() {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
       <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-slate-100">
         <button
-          onClick={() => setSelectedTutorForBooking(null)}
+          onClick={onClose}
           className="absolute left-4 top-4 text-slate-400 hover:text-slate-600 rounded-lg p-1"
         >
           <X className="h-5 w-5" />
@@ -65,14 +71,14 @@ export function BookingModal() {
 
             <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200/60">
               <img
-                src={selectedTutorForBooking.avatarUrl}
-                alt={selectedTutorForBooking.name}
+                src={tutor.avatarUrl}
+                alt={tutor.name}
                 className="h-12 w-12 rounded-full object-cover border border-slate-200"
               />
               <div>
-                <h3 className="font-bold text-slate-900 text-sm">{selectedTutorForBooking.name}</h3>
+                <h3 className="font-bold text-slate-900 text-sm">{tutor.name}</h3>
                 <p className="text-xs text-[#6366F1] font-extrabold">
-                  {selectedTutorForBooking.hourlyRate} د.م / ساعة
+                  {tutor.hourlyRate} د.م / ساعة
                 </p>
               </div>
             </div>
