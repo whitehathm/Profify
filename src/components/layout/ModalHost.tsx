@@ -2,11 +2,14 @@ import { useApp } from '@/context/AppContext';
 import { BookingModal } from '@/components/modals/BookingModal';
 
 export function ModalHost() {
-  const { selectedTutorForBooking } = useApp();
+  const { selectedTutorForBooking, setSelectedTutorForBooking } = useApp();
+
+  if (!selectedTutorForBooking) return null;
 
   return (
-    <>
-      {selectedTutorForBooking && <BookingModal />}
-    </>
+    <BookingModal
+      tutor={selectedTutorForBooking}
+      onClose={() => setSelectedTutorForBooking(null)}
+    />
   );
 }
