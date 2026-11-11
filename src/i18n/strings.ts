@@ -31,7 +31,7 @@ export const strings = {
   modeOnline: { ar: 'عن بُعد', fr: 'En ligne', en: 'Online' },
   modeInPerson: { ar: 'حضوري', fr: 'Présentiel', en: 'In person' },
   verifiedBadge: { ar: 'أستاذ موثوق', fr: 'Vérifié', en: 'Verified' },
-  currency: { ar: 'درهم', fr: 'DH', en: 'DH' },
+  currency: { ar: 'د.م', fr: 'MAD', en: 'MAD' },
   perHour: { ar: '/ ساعة', fr: '/ h', en: '/ hr' },
   reviewsCount: { ar: '({count} تقييم)', fr: '({count} avis)', en: '({count} reviews)' },
   tutorsHeading: { ar: 'الأساتذة', fr: 'Professeurs', en: 'Tutors' },

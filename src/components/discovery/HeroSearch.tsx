@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { CITIES, POPULAR_SUBJECT_IDS, subjectLabel } from '@/data/catalog';
 import type { TeachingMode, TutorFilters } from '@/types';
 import { useApp } from '@/context/AppContext';
@@ -12,7 +13,7 @@ interface HeroSearchProps {
   onSearch: () => void;
 }
 
-function SearchField({ label, children }: { label: string; children: React.ReactNode }) {
+function SearchField({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
       <span className="mb-1.5 block px-1 text-xs font-bold text-slate-900">{label}</span>
