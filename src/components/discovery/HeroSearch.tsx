@@ -1,4 +1,4 @@
-import { CITIES, HERO_IMAGE, POPULAR_SUBJECT_IDS, subjectLabel } from '@/data/catalog';
+import { CITIES, POPULAR_SUBJECT_IDS, subjectLabel } from '@/data/catalog';
 import type { TeachingMode, TutorFilters } from '@/types';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/Button';
@@ -28,13 +28,13 @@ export function HeroSearch({ filters, onChange, onSearch }: HeroSearchProps) {
     <section className="relative isolate overflow-hidden bg-white text-slate-900 border-b border-slate-200">
       <div className="mx-auto max-w-7xl px-4 pb-14 pt-10 sm:px-6 sm:pb-20 sm:pt-16 lg:pt-20">
         <div className="max-w-3xl animate-slide-up">
-          <span className="inline-flex items-center rounded-full bg-[#D54B74]/10 px-3 py-1 text-xs font-bold text-[#D54B74] border border-[#D54B74]/20">
+          <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-[#6366F1] border border-indigo-200">
             {t('tagline')}
           </span>
-          <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl leading-[1.15]">
+          <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-[#0F172A] sm:text-5xl lg:text-6xl leading-[1.15]">
             {lang === 'ar' ? (
               <>
-                ابحث عن <span className="text-[#D54B74]">أستاذك المثالي</span> لدروس الدعم واللغات في المغرب
+                ابحث عن <span className="text-[#6366F1]">أستاذك المثالي</span> لدروس الدعم واللغات في المغرب
               </>
             ) : (
               t('heroTitle')
@@ -58,7 +58,7 @@ export function HeroSearch({ filters, onChange, onSearch }: HeroSearchProps) {
 
           <SearchField label={t('fieldCity')}>
             <select
-              className={`${inputClass} bg-white text-slate-900 border-slate-300 focus:border-[#D54B74] focus:ring-[#D54B74]`}
+              className={`${inputClass} bg-white text-slate-900 border-slate-300 focus:border-[#6366F1] focus:ring-[#6366F1]`}
               value={filters.cityId ?? ''}
               onChange={(event) => onChange({ cityId: event.target.value || null })}
             >
@@ -73,7 +73,7 @@ export function HeroSearch({ filters, onChange, onSearch }: HeroSearchProps) {
 
           <SearchField label={t('fieldMode')}>
             <select
-              className={`${inputClass} bg-white text-slate-900 border-slate-300 focus:border-[#D54B74] focus:ring-[#D54B74]`}
+              className={`${inputClass} bg-white text-slate-900 border-slate-300 focus:border-[#6366F1] focus:ring-[#6366F1]`}
               value={filters.mode}
               onChange={(event) => onChange({ mode: event.target.value as TutorFilters['mode'] })}
             >
@@ -87,7 +87,7 @@ export function HeroSearch({ filters, onChange, onSearch }: HeroSearchProps) {
             type="submit"
             size="lg"
             icon={<Search className="h-4 w-4" />}
-            className="w-full sm:w-auto bg-[#D54B74] hover:bg-[#b8355c] text-white border border-slate-900 font-bold shadow-sm rounded-xl px-6 py-3"
+            className="w-full sm:w-auto bg-[#6366F1] hover:bg-[#4F46E5] text-white border border-[#6366F1] font-bold shadow-sm rounded-xl px-6 py-3"
           >
             {t('searchButton')}
           </Button>
@@ -100,7 +100,7 @@ export function HeroSearch({ filters, onChange, onSearch }: HeroSearchProps) {
               key={id}
               type="button"
               onClick={() => onChange({ subjectId: id })}
-              className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-800 border border-slate-200 transition hover:bg-[#D54B74] hover:text-white hover:border-slate-900"
+              className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-800 border border-slate-200 transition hover:bg-[#6366F1] hover:text-white hover:border-[#4F46E5]"
             >
               {subjectLabel(id, lang)}
             </button>

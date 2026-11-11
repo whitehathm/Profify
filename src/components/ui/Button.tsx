@@ -4,10 +4,10 @@ type Variant = 'primary' | 'accent' | 'outline' | 'ghost';
 type Size = 'sm' | 'md' | 'lg';
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-primary-700 text-white shadow-sm shadow-primary-900/20 hover:bg-primary-800',
-  accent: 'bg-accent-400 text-primary-950 shadow-sm hover:bg-accent-300',
-  outline: 'border border-slate-300 bg-white text-primary-900 hover:border-primary-300 hover:bg-primary-50',
-  ghost: 'text-primary-800 hover:bg-primary-50',
+  primary: 'bg-[#6366F1] text-white font-bold shadow-sm hover:bg-[#4F46E5]',
+  accent: 'bg-[#6366F1] text-white font-bold shadow-sm hover:bg-[#4F46E5]',
+  outline: 'border border-slate-300 bg-white text-slate-900 hover:border-[#6366F1] hover:bg-indigo-50',
+  ghost: 'text-slate-900 hover:bg-indigo-50',
 };
 
 const SIZES: Record<Size, string> = {
@@ -36,7 +36,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-medium transition duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 ${VARIANTS[variant]} ${SIZES[size]} ${block ? 'w-full' : ''} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-bold transition duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 ${VARIANTS[variant]} ${SIZES[size]} ${block ? 'w-full' : ''} ${className}`}
       {...rest}
     >
       {icon}
