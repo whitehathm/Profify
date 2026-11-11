@@ -43,8 +43,8 @@ export function DiscoverPage() {
         <aside className="hidden w-72 shrink-0 lg:block">
           <div className="sticky top-24 rounded-2xl bg-white p-6 shadow-sm border border-slate-900/10 ring-1 ring-slate-900/5">
             <div className="mb-6 flex items-center gap-2 text-slate-900">
-              <SlidersHorizontal className="h-4 w-4 text-[#D54B74]" aria-hidden="true" />
-              <h2 className="font-bold text-lg text-slate-900">{t('filtersTitle')}</h2>
+              <SlidersHorizontal className="h-4 w-4 text-[#6366F1]" aria-hidden="true" />
+              <h2 className="font-bold text-lg text-[#0F172A]">{t('filtersTitle')}</h2>
             </div>
             {filterPanel}
           </div>
@@ -73,7 +73,7 @@ export function DiscoverPage() {
           title={t('filtersTitle')}
           onClose={() => setDrawerOpen(false)}
           footer={
-            <Button block onClick={() => setDrawerOpen(false)} className="bg-[#D54B74] text-white border border-slate-900 font-bold hover:bg-[#b8355c]">
+            <Button block onClick={() => setDrawerOpen(false)} className="bg-[#6366F1] text-white border border-[#6366F1] font-bold hover:bg-[#4F46E5] rounded-xl">
               {t('showResults', { count: formatNumber(results.length) })}
             </Button>
           }

@@ -18,10 +18,10 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-800 text-accent-300 shadow-sm">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#6366F1] text-white shadow-sm">
             <GraduationCap className="h-5 w-5" aria-hidden="true" />
           </span>
-          <span className="text-lg font-bold tracking-tight text-primary-950">Profify</span>
+          <span className="text-lg font-bold tracking-tight text-[#0F172A]">Profify</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -29,7 +29,7 @@ export function Header() {
 
           {user ? (
             <div className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent-400 text-sm font-bold text-primary-950">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-[#4F46E5]">
                 {initials(user.name)}
               </span>
               <button

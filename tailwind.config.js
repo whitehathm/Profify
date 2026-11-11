@@ -9,32 +9,31 @@ export default {
         sans: ['Inter', 'IBM Plex Sans Arabic', 'system-ui', 'sans-serif'],
       },
       colors: {
-        // Preply Identity Palette
         primary: {
-          50: '#FDF2F5',
-          100: '#FCE7EC',
-          200: '#F8CFD9',
-          300: '#F3A7B9',
-          400: '#E87593',
-          500: '#D54B74', // Main Preply Rose Pink
-          600: '#D54B74', // Primary Accent
-          700: '#B8355C',
-          800: '#982C4D',
-          900: '#0F172A', // Slate Navy Typography
-          950: '#020617',
+          50: '#EEF2FF',
+          100: '#E0E7FF',
+          200: '#C7D2FE',
+          300: '#A5B4FC',
+          400: '#818CF8',
+          500: '#6366F1',
+          600: '#6366F1',
+          700: '#6366F1',
+          800: '#4F46E5',
+          900: '#0F172A',
+          950: '#0F172A',
         },
         accent: {
-          50: '#FDF2F5',
-          100: '#FCE7EC',
-          200: '#F8CFD9',
-          300: '#F3A7B9',
-          400: '#E87593',
-          500: '#D54B74',
-          600: '#D54B74',
-          700: '#B8355C',
-          800: '#982C4D',
+          50: '#EEF2FF',
+          100: '#E0E7FF',
+          200: '#C7D2FE',
+          300: '#A5B4FC',
+          400: '#818CF8',
+          500: '#6366F1',
+          600: '#6366F1',
+          700: '#6366F1',
+          800: '#4F46E5',
           900: '#0F172A',
-          950: '#020617',
+          950: '#0F172A',
         },
         secondary: {
           50: '#FFFFFF', // Pure White Base
@@ -64,9 +63,9 @@ export default {
         error: {
           50: '#FFF1F2',
           100: '#FFE4E6',
-          500: '#F43F5E',
-          600: '#D54B74',
-          700: '#BE123C',
+          500: '#EF4444',
+          600: '#DC2626',
+          700: '#B91C1C',
         },
       },
       boxShadow: {

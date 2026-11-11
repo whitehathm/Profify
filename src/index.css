@@ -2,55 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* PURE WHITE BACKGROUND & DEEP SLATE TYPOGRAPHY */
-html, body, #root, main {
-  background-color: #FFFFFF !important;
-  color: #0F172A !important;
-}
-
-/* MODERN INDIGO / PURPLE ACCENT (#6366F1 & #4F46E5) */
-button.bg-primary-600,
-button.bg-primary-500,
-a.bg-primary-600,
-.bg-primary-600,
-.bg-primary-500,
-.bg-rose-600,
-.bg-rose-500 {
-  background-color: #6366F1 !important;
-  color: #FFFFFF !important;
-  border: 1px solid #4F46E5 !important;
-  border-radius: 0.75rem !important;
-}
-
-button.bg-primary-600:hover,
-a.bg-primary-600:hover {
-  background-color: #4F46E5 !important;
-}
-
-/* TEXT HIGHLIGHTS & BADGES */
-.text-primary-600,
-.text-rose-600,
-.text-rose-500 {
-  color: #6366F1 !important;
-}
-
-.bg-rose-50,
-.bg-primary-50 {
-  background-color: #EEF2FF !important;
-}
-
-/* CARDS & BORDERS */
-.bg-slate-50, 
-.bg-gray-50 {
-  background-color: #FFFFFF !important;
-}
-
-.border-primary-600,
-.border-rose-600 {
-  border-color: #6366F1 !important;
+html,
+body,
+#root,
+main {
+  min-height: 100%;
+  background-color: #FFFFFF;
+  color: #0F172A;
 }
 
 :focus-visible {
-  outline: 2px solid #6366F1 !important;
+  outline: 2px solid #6366F1;
   outline-offset: 2px;
 }
