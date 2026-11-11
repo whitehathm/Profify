@@ -5,15 +5,13 @@ import { X, Video, MapPin, CheckCircle2 } from 'lucide-react';
 import type { Tutor } from '@/types';
 
 interface BookingModalProps {
-  tutor?: Tutor | null;
-  onClose?: () => void;
+  tutor: Tutor;
+  onClose: () => void;
 }
 
 export function BookingModal({ tutor, onClose }: BookingModalProps) {
   const { lang } = useApp();
   const [isSuccess, setIsSuccess] = useState(false);
-
-  if (!tutor) return null;
 
   const labels = {
     ar: {
@@ -49,7 +47,7 @@ export function BookingModal({ tutor, onClose }: BookingModalProps) {
     setIsSuccess(true);
     setTimeout(() => {
       setIsSuccess(false);
-      if (onClose) onClose();
+      onClose();
     }, 1800);
   };
 
