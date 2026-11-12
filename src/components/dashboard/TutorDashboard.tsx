@@ -8,13 +8,15 @@ import { StatCard } from '@/components/dashboard/StatCard';
 import { formatDate, formatNumber, initials } from '@/lib/format';
 
 export function TutorDashboard() {
-  const { lang, t, bookings, tutors, setBookingStatus } = useApp();
-  const tutor = tutors.find((item) => item.id === CURRENT_TUTOR_ID);
+  const { lang, t, user, bookings, tutors, setBookingStatus } = useApp();
+  const tutor = (user && tutors.find((item) => item.ownerId === user.id))
+    ?? tutors.find((item) => item.id === CURRENT_TUTOR_ID);
+  const activeTutorId = tutor?.id ?? CURRENT_TUTOR_ID;
   const tutorBookings = useMemo(
     () => bookings
-      .filter((booking) => booking.tutorId === CURRENT_TUTOR_ID)
+      .filter((booking) => booking.tutorId === activeTutorId)
       .sort((first, second) => first.date.localeCompare(second.date) || first.time.localeCompare(second.time)),
-    [bookings],
+    [bookings, activeTutorId],
   );
   const visibleBookings = tutorBookings.filter((booking) => booking.status === 'pending' || booking.status === 'accepted');
   const confirmedBookings = tutorBookings.filter((booking) => booking.status === 'accepted');

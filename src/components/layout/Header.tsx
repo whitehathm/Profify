@@ -36,9 +36,9 @@ export function Header() {
                 type="button"
                 title={t('logout')}
                 aria-label={t('logout')}
-                onClick={() => {
-                  signOut();
-                  notify(t('toastLoggedOut'));
+                onClick={async () => {
+                  const signedOut = await signOut();
+                  notify(t(signedOut ? 'toastLoggedOut' : 'authUnexpected'));
                 }}
                 className="flex h-9 w-9 items-center justify-center rounded-full text-slate-600 transition hover:bg-slate-100 hover:text-primary-900"
               >

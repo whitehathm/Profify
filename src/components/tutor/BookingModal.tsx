@@ -33,7 +33,7 @@ export function BookingModal({ tutorId, initialDate, initialTime }: BookingModal
 
   if (!tutor) return null;
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const nextErrors: BookingErrors = {};
     if (studentName.trim().length < 2) nextErrors.name = t('errName');
@@ -42,7 +42,7 @@ export function BookingModal({ tutorId, initialDate, initialTime }: BookingModal
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0 || !date || !time) return;
 
-    addBooking({
+    const saved = await addBooking({
       tutorId: tutor.id,
       studentName: studentName.trim(),
       studentPhone: studentPhone.trim(),
@@ -50,6 +50,7 @@ export function BookingModal({ tutorId, initialDate, initialTime }: BookingModal
       time,
       mode,
     });
+    if (!saved) return;
     notify(t('toastBooked'));
     setSubmitted(true);
   };
