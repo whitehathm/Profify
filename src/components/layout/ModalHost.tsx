@@ -1,4 +1,5 @@
 import { AuthModal } from '@/components/auth/AuthModal';
+import { BecomeTutorModal } from '@/components/tutor/BecomeTutorModal';
 import { ContactModal } from '@/components/tutor/ContactModal';
 import { BookingModal } from '@/components/tutor/BookingModal';
 import { TutorProfileModal } from '@/components/tutor/TutorProfileModal';
@@ -10,6 +11,8 @@ export function ModalHost() {
   if (!modal) return null;
 
   switch (modal.type) {
+    case 'become-tutor':
+      return <BecomeTutorModal />;
     case 'profile':
       return <TutorProfileModal key={`profile-${modal.tutorId}`} tutorId={modal.tutorId} />;
     case 'book':

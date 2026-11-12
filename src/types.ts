@@ -69,6 +69,7 @@ export interface TutorFilters {
 }
 
 export type ModalState =
+  | { type: 'become-tutor' }
   | { type: 'profile'; tutorId: string }
   | { type: 'book'; tutorId: string; date?: string; time?: string }
   | { type: 'contact'; tutorId: string }

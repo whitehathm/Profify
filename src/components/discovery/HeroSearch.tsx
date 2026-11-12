@@ -4,7 +4,7 @@ import type { TeachingMode, TutorFilters } from '@/types';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/Button';
 import { inputClass } from '@/components/ui/Field';
-import { Search } from 'lucide-react';
+import { GraduationCap, Search } from 'lucide-react';
 import { SubjectCombobox } from '@/components/discovery/SubjectCombobox';
 
 interface HeroSearchProps {
@@ -23,7 +23,7 @@ function SearchField({ label, children }: { label: string; children: ReactNode }
 }
 
 export function HeroSearch({ filters, onChange, onSearch }: HeroSearchProps) {
-  const { t, lang } = useApp();
+  const { t, lang, openModal } = useApp();
 
   return (
     <section className="relative isolate overflow-hidden bg-white text-slate-900 border-b border-slate-200">
@@ -44,6 +44,14 @@ export function HeroSearch({ filters, onChange, onSearch }: HeroSearchProps) {
           <p className="mt-4 text-base font-normal leading-relaxed text-slate-600 sm:text-lg">
             {t('heroSubtitle')}
           </p>
+          <Button
+            type="button"
+            onClick={() => openModal({ type: 'become-tutor' })}
+            icon={<GraduationCap className="h-4 w-4" aria-hidden="true" />}
+            className="mt-5 w-full sm:w-auto"
+          >
+            {t('becomeTutor')}
+          </Button>
         </div>
 
         <form
