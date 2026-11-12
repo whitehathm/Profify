@@ -10,6 +10,7 @@ import { formatNumber } from '@/lib/format';
 export function TutorCard({ tutor, index }: { tutor: Tutor; index: number }) {
   const { t, lang, savedIds, toggleSaved, openModal, notify } = useApp();
   const saved = savedIds.includes(tutor.id);
+  const openProfile = () => openModal({ type: 'profile', tutorId: tutor.id });
 
   return (
     <article
@@ -19,21 +20,30 @@ export function TutorCard({ tutor, index }: { tutor: Tutor; index: number }) {
       <div className="flex items-start gap-4">
         <button
           type="button"
-          onClick={() => openModal({ type: 'profile', tutorId: tutor.id })}
-          aria-label={t('viewProfile')}
-          className="rounded-2xl transition group-hover:scale-[1.03]"
+          onClick={openProfile}
+          aria-label={`${t('viewProfile')}: ${tutor.name}`}
+          className="shrink-0 rounded-2xl transition group-hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
         >
           <Avatar src={tutor.avatar} name={tutor.name} size="lg" />
         </button>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="truncate font-bold text-primary-950">{tutor.name}</h3>
+          <h3 className="truncate font-bold text-primary-950">
+            <button
+              type="button"
+              onClick={openProfile}
+              className="text-start transition hover:text-primary-700 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            >
+              {tutor.name}
+            </button>
+          </h3>
+          <p className="mt-1 line-clamp-2 text-sm font-medium text-primary-700">{tutor.headline[lang]}</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {tutor.verified && <VerifiedBadge />}
+            <p className="flex min-w-0 items-center gap-1 text-sm text-slate-600">
+              <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <span className="truncate">{cityLabel(tutor.cityId, lang)}</span>
+            </p>
           </div>
-          {tutor.verified && <div className="mt-1.5"><VerifiedBadge /></div>}
-          <p className="mt-1.5 flex items-center gap-1 text-sm text-slate-600">
-            <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            <span className="truncate">{cityLabel(tutor.cityId, lang)}</span>
-          </p>
         </div>
         <button
           type="button"
@@ -48,6 +58,8 @@ export function TutorCard({ tutor, index }: { tutor: Tutor; index: number }) {
           <Heart className={`h-5 w-5 transition ${saved ? 'fill-error-500 text-error-500' : 'text-slate-400'}`} aria-hidden="true" />
         </button>
       </div>
+
+      <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-slate-600">{tutor.bio[lang]}</p>
 
       <div className="mt-4 flex items-center gap-2 text-sm">
         <RatingStars rating={tutor.rating} count={tutor.reviewCount} />

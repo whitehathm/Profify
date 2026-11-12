@@ -1,27 +1,31 @@
-import { useState, useEffect } from 'react';
+import { AuthModal } from '@/components/auth/AuthModal';
+import { ContactModal } from '@/components/tutor/ContactModal';
 import { BookingModal } from '@/components/tutor/BookingModal';
-import type { Tutor } from '@/types';
+import { TutorProfileModal } from '@/components/tutor/TutorProfileModal';
+import { useApp } from '@/context/AppContext';
 
 export function ModalHost() {
-  const [activeTutor, setActiveTutor] = useState<Tutor | null>(null);
+  const { modal } = useApp();
 
-  useEffect(() => {
-    const handleOpenModal = (event: Event) => {
-      setActiveTutor((event as CustomEvent<Tutor>).detail);
-    };
+  if (!modal) return null;
 
-    window.addEventListener('open-booking-modal', handleOpenModal);
-    return () => {
-      window.removeEventListener('open-booking-modal', handleOpenModal);
-    };
-  }, []);
-
-  if (!activeTutor) return null;
-
-  return (
-    <BookingModal
-      tutor={activeTutor}
-      onClose={() => setActiveTutor(null)}
-    />
-  );
+  switch (modal.type) {
+    case 'profile':
+      return <TutorProfileModal key={`profile-${modal.tutorId}`} tutorId={modal.tutorId} />;
+    case 'book':
+      return (
+        <BookingModal
+          key={`booking-${modal.tutorId}`}
+          tutorId={modal.tutorId}
+          initialDate={modal.date}
+          initialTime={modal.time}
+        />
+      );
+    case 'contact':
+      return <ContactModal key={`contact-${modal.tutorId}`} tutorId={modal.tutorId} />;
+    case 'auth':
+      return <AuthModal key={`auth-${modal.mode}`} initialMode={modal.mode} />;
+    default:
+      return null;
+  }
 }
