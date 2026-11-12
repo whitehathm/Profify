@@ -64,17 +64,15 @@ export function Header() {
             xmlns="http://www.w3.org/2000/svg"
             aria-hidden="true"
           >
+            <rect width="40" height="40" rx="11" fill="#FF5A79" />
             <path
-              d="M9 17C9 12.0294 13.0294 8 18 8H21C25.9706 8 30 12.0294 30 17C30 21.9706 25.9706 26 21 26H15L9 32.5V17Z"
-              fill="#121117"
+              d="M14.5 29V15.5C14.5 12.4624 16.9624 10 20 10H22.5C25.8137 10 28.5 12.6863 28.5 16C28.5 19.3137 25.8137 22 22.5 22H18.5"
+              stroke="#FFFFFF"
+              strokeWidth="4.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
-            <path
-              d="M14 15.5C14 10.8056 17.8056 7 22.5 7H24.5C29.1944 7 33 10.8056 33 15.5C33 20.1944 29.1944 24 24.5 24H20L14 28.5V15.5Z"
-              fill="#FF5A79"
-              fillOpacity="0.92"
-            />
-            <circle cx="21.5" cy="15.5" r="1.7" fill="#FFFFFF" />
-            <circle cx="26.5" cy="15.5" r="1.7" fill="#FFFFFF" />
+            <circle cx="22.5" cy="28" r="2.4" fill="#121117" />
           </svg>
 
           <span className="text-xl font-extrabold tracking-tight text-[#121117]">
