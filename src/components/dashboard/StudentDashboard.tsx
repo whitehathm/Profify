@@ -1,144 +1,135 @@
+import { useMemo, type ReactNode } from 'react';
+import { ArrowLeft, ArrowRight, Bookmark, Calendar, Clock, CheckCircle2 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { CURRENT_STUDENT_ID, subjectLabel } from '@/data/catalog';
+import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
-import { Bookmark, Clock, CheckCircle2, Calendar, Video, ArrowRight, ArrowLeft } from 'lucide-react';
+import { StatusBadge } from '@/components/ui/Badges';
+import { formatDate, formatNumber } from '@/lib/format';
 
 export function StudentDashboard() {
-  const { lang } = useApp();
-
-  const labels = {
-    ar: {
-      title: 'مساحتي الخاصة',
-      subtitle: 'متابعة الحصص القادمة، الطلبات والمعلمين المحفوظين',
-      exploreBtn: 'استكشاف الأساتذة',
-      savedTutors: 'أساتذة محفوظون',
-      pendingRequests: 'طلبات معلقة',
-      confirmedLessons: 'حصص مؤكدة',
-      tutorsCount: 'أستاذ',
-      requestsCount: 'طلب',
-      lessonsCount: 'حصة',
-      upcomingTitle: 'الحصة القادمة',
-      upcomingSubject: 'مراجعة اللغة الفرنسية - BAC',
-      upcomingTime: 'غداً في الساعة 18:00 (عن بُعد)',
-      joinClass: 'دخول قاعة الدرس',
-      savedSectionTitle: 'الأساتذة المحفوظون مؤخراً',
-      noSaved: 'لا يوجد أساتذة محفوظون حالياً',
-    },
-    fr: {
-      title: 'Mon Espace',
-      subtitle: 'Suivez vos prochains cours, demandes et professeurs enregistrés',
-      exploreBtn: 'Explorer les professeurs',
-      savedTutors: 'Professeurs enregistrés',
-      pendingRequests: 'Demandes en attente',
-      confirmedLessons: 'Cours confirmés',
-      tutorsCount: 'profs',
-      requestsCount: 'demande',
-      lessonsCount: 'cours',
-      upcomingTitle: 'Prochain Cours',
-      upcomingSubject: 'Révision de Français - BAC',
-      upcomingTime: 'Demain à 18:00 (En ligne)',
-      joinClass: 'Rejoindre la classe',
-      savedSectionTitle: 'Professeurs récents enregistrés',
-      noSaved: 'Aucun professeur enregistré pour le moment',
-    },
-    en: {
-      title: 'My Workspace',
-      subtitle: 'Track your upcoming lessons, requests, and saved tutors',
-      exploreBtn: 'Explore Tutors',
-      savedTutors: 'Saved Tutors',
-      pendingRequests: 'Pending Requests',
-      confirmedLessons: 'Confirmed Lessons',
-      tutorsCount: 'tutors',
-      requestsCount: 'request',
-      lessonsCount: 'lessons',
-      upcomingTitle: 'Upcoming Lesson',
-      upcomingSubject: 'French Revision - BAC Prep',
-      upcomingTime: 'Tomorrow at 18:00 (Online)',
-      joinClass: 'Join Classroom',
-      savedSectionTitle: 'Recently Saved Tutors',
-      noSaved: 'No saved tutors at the moment',
-    },
-  }[lang || 'ar'];
-
+  const { lang, t, bookings, savedIds, tutors, setBookingStatus, setRole, openModal } = useApp();
+  const studentBookings = useMemo(
+    () => bookings
+      .filter((booking) => booking.studentId === CURRENT_STUDENT_ID)
+      .sort((first, second) => first.date.localeCompare(second.date) || first.time.localeCompare(second.time)),
+    [bookings],
+  );
+  const savedTutors = tutors.filter((tutor) => savedIds.includes(tutor.id));
+  const pendingCount = studentBookings.filter((booking) => booking.status === 'pending').length;
+  const confirmedCount = studentBookings.filter((booking) => booking.status === 'accepted').length;
   const ArrowIcon = lang === 'ar' ? ArrowLeft : ArrowRight;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 space-y-8">
-      {/* 1. Professional Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+    <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6">
+      <header className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">{labels.title}</h1>
-          <p className="text-xs text-slate-500 mt-1">{labels.subtitle}</p>
+          <h1 className="text-2xl font-bold tracking-tight text-primary-950">{t('studentTitle')}</h1>
+          <p className="mt-1 text-sm text-slate-600">{t('studentSubtitle')}</p>
         </div>
-        <Button className="bg-[#6366F1] hover:bg-[#4F46E5] text-white text-xs font-bold rounded-xl px-4 py-2.5 flex items-center justify-center gap-2 shadow-sm border border-indigo-600">
-          <span>{labels.exploreBtn}</span>
-          <ArrowIcon className="h-4 w-4" />
+        <Button onClick={() => setRole('visitor')} icon={<ArrowIcon className="h-4 w-4" aria-hidden="true" />}>
+          {t('browseTutors')}
         </Button>
+      </header>
+
+      <section aria-label={t('studentTitle')} className="grid gap-3 sm:grid-cols-3">
+        <MetricCard icon={<Bookmark className="h-4 w-4 text-primary-600" aria-hidden="true" />} label={t('statSaved')} value={savedIds.length} />
+        <MetricCard icon={<Clock className="h-4 w-4 text-warning-600" aria-hidden="true" />} label={t('statPending')} value={pendingCount} />
+        <MetricCard icon={<CheckCircle2 className="h-4 w-4 text-success-600" aria-hidden="true" />} label={t('statConfirmed')} value={confirmedCount} />
+      </section>
+
+      <section className="space-y-4" aria-labelledby="student-bookings-heading">
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-primary-600" aria-hidden="true" />
+          <h2 id="student-bookings-heading" className="text-lg font-bold text-primary-950">{t('tabBookings')}</h2>
+        </div>
+        {studentBookings.length === 0 ? (
+          <EmptyState title={t('bookingsEmptyTitle')} description={t('bookingsEmptyText')} />
+        ) : (
+          <div className="grid gap-3 lg:grid-cols-2">
+            {studentBookings.map((booking) => {
+              const tutor = tutors.find((item) => item.id === booking.tutorId);
+              return (
+                <article key={booking.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      {tutor && <Avatar src={tutor.avatar} name={tutor.name} size="md" />}
+                      <div className="min-w-0">
+                        <h3 className="truncate font-semibold text-primary-950">{tutor?.name ?? booking.tutorId}</h3>
+                        <p className="mt-1 text-sm text-slate-600">
+                          {tutor?.subjectIds[0] ? subjectLabel(tutor.subjectIds[0], lang) : t('bookTrial')}
+                        </p>
+                      </div>
+                    </div>
+                    <StatusBadge status={booking.status} />
+                  </div>
+                  <p className="mt-4 text-sm text-slate-600">
+                    {t('sessionAt', { date: formatDate(booking.date, lang, { weekday: 'short', day: 'numeric', month: 'short' }), time: booking.time })}
+                    {' · '}
+                    {t(booking.mode === 'online' ? 'modeOnline' : 'modeInPerson')}
+                  </p>
+                  {booking.status === 'pending' && (
+                    <div className="mt-4 border-t border-slate-100 pt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setBookingStatus(booking.id, 'cancelled')}
+                      >
+                        {t('cancelRequest')}
+                      </Button>
+                    </div>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <section className="space-y-4" aria-labelledby="saved-tutors-heading">
+        <h2 id="saved-tutors-heading" className="text-lg font-bold text-primary-950">{t('savedTutorsHeading')}</h2>
+        {savedTutors.length === 0 ? (
+          <EmptyState title={t('savedEmptyTitle')} description={t('savedEmptyText')} />
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {savedTutors.map((tutor) => (
+              <button
+                key={tutor.id}
+                type="button"
+                onClick={() => openModal({ type: 'profile', tutorId: tutor.id })}
+                className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-start transition hover:border-primary-300 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              >
+                <Avatar src={tutor.avatar} name={tutor.name} size="md" />
+                <span className="min-w-0">
+                  <span className="block truncate font-semibold text-primary-950">{tutor.name}</span>
+                  <span className="mt-1 block line-clamp-2 text-sm text-slate-600">{tutor.headline[lang]}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function MetricCard({ icon, label, value }: { icon: ReactNode; label: string; value: number }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mb-2 flex items-center justify-between text-slate-600">
+        <span className="text-sm font-medium">{label}</span>
+        {icon}
       </div>
+      <p className="text-2xl font-bold text-primary-950">{formatNumber(value)}</p>
+    </div>
+  );
+}
 
-      {/* 2. Compact Stats Grid (Matching Tutor Dashboard Style) */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="rounded-xl bg-slate-50 p-4 border border-slate-200/60">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-semibold">{labels.savedTutors}</span>
-            <Bookmark className="h-4 w-4 text-[#6366F1]" />
-          </div>
-          <div className="flex items-baseline gap-1">
-            <span className="text-xl font-extrabold text-slate-900">2</span>
-            <span className="text-xs text-slate-500">{labels.tutorsCount}</span>
-          </div>
-        </div>
-
-        <div className="rounded-xl bg-slate-50 p-4 border border-slate-200/60">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-semibold">{labels.pendingRequests}</span>
-            <Clock className="h-4 w-4 text-amber-600" />
-          </div>
-          <div className="flex items-baseline gap-1">
-            <span className="text-xl font-extrabold text-slate-900">1</span>
-            <span className="text-xs text-slate-500">{labels.requestsCount}</span>
-          </div>
-        </div>
-
-        <div className="rounded-xl bg-slate-50 p-4 border border-slate-200/60">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-semibold">{labels.confirmedLessons}</span>
-            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-          </div>
-          <div className="flex items-baseline gap-1">
-            <span className="text-xl font-extrabold text-slate-900">1</span>
-            <span className="text-xs text-slate-500">{labels.lessonsCount}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Actionable Upcoming Lesson Section */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-[#6366F1]" />
-            {labels.upcomingTitle}
-          </h2>
-          <span className="text-xs font-semibold bg-emerald-50 text-emerald-600 px-2.5 py-0.5 rounded-full">
-            مؤكدة
-          </span>
-        </div>
-
-        <div className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-slate-100 pt-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-indigo-50 text-[#6366F1] font-bold flex items-center justify-center text-xs border border-indigo-100">
-              <Video className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-900 text-sm">{labels.upcomingSubject}</h3>
-              <p className="text-xs text-slate-500">{labels.upcomingTime}</p>
-            </div>
-          </div>
-
-          <button className="flex items-center justify-center gap-1.5 bg-[#6366F1] hover:bg-[#4F46E5] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-sm w-full sm:w-auto">
-            {labels.joinClass}
-          </button>
-        </div>
-      </div>
+function EmptyState({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center">
+      <p className="font-semibold text-primary-950">{title}</p>
+      <p className="mt-1 text-sm text-slate-600">{description}</p>
     </div>
   );
 }

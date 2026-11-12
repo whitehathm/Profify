@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Booking, BookingStatus, Lang, ModalState, Role, TeachingMode, Toast, Tutor } from '@/types';
 import { TUTORS } from '@/data/tutors';
 import { SEED_BOOKINGS } from '@/data/bookings';
@@ -48,16 +48,89 @@ interface AppContextValue {
 const AppContext = createContext<AppContextValue | null>(null);
 
 const TOAST_DURATION_MS = 3000;
+const BOOKINGS_STORAGE_KEY = 'profify:bookings:v1';
+const SAVED_TUTORS_STORAGE_KEY = 'profify:saved-tutor-ids:v1';
+
+function isBooking(value: unknown): value is Booking {
+  if (!value || typeof value !== 'object') return false;
+  const booking = value as Partial<Booking>;
+  return (
+    typeof booking.id === 'string' &&
+    typeof booking.tutorId === 'string' &&
+    typeof booking.studentId === 'string' &&
+    typeof booking.studentName === 'string' &&
+    typeof booking.studentPhone === 'string' &&
+    typeof booking.date === 'string' &&
+    typeof booking.time === 'string' &&
+    (booking.mode === 'online' || booking.mode === 'in_person') &&
+    ['pending', 'accepted', 'declined', 'cancelled'].includes(booking.status ?? '') &&
+    typeof booking.createdAt === 'string'
+  );
+}
+
+function isBookingArray(value: unknown): value is Booking[] {
+  return Array.isArray(value) && value.every(isBooking);
+}
+
+function isSavedTutorIdArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((id) => typeof id === 'string');
+}
+
+function readStorageArray<T>(key: string, fallback: T[], isValid: (value: unknown) => value is T[]): T[] {
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const stored = window.localStorage.getItem(key);
+    if (stored === null) return fallback;
+    const parsed: unknown = JSON.parse(stored);
+    return isValid(parsed) ? parsed : fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Lang>('ar');
   const [role, setRole] = useState<Role>('visitor');
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [tutors, setTutors] = useState<Tutor[]>(TUTORS);
-  const [savedIds, setSavedIds] = useState<string[]>([]);
-  const [bookings, setBookings] = useState<Booking[]>(SEED_BOOKINGS);
+  const [savedIds, setSavedIds] = useState<string[]>(() =>
+    readStorageArray(SAVED_TUTORS_STORAGE_KEY, [], isSavedTutorIdArray),
+  );
+  const [bookings, setBookings] = useState<Booking[]>(() =>
+    readStorageArray(BOOKINGS_STORAGE_KEY, SEED_BOOKINGS, isBookingArray),
+  );
   const [modal, setModal] = useState<ModalState>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(bookings));
+    } catch {
+      return;
+    }
+  }, [bookings]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(SAVED_TUTORS_STORAGE_KEY, JSON.stringify(savedIds));
+    } catch {
+      return;
+    }
+  }, [savedIds]);
+
+  useEffect(() => {
+    const syncFromStorage = (event: StorageEvent) => {
+      if (event.key === null || event.key === BOOKINGS_STORAGE_KEY) {
+        setBookings(readStorageArray(BOOKINGS_STORAGE_KEY, SEED_BOOKINGS, isBookingArray));
+      }
+      if (event.key === null || event.key === SAVED_TUTORS_STORAGE_KEY) {
+        setSavedIds(readStorageArray(SAVED_TUTORS_STORAGE_KEY, [], isSavedTutorIdArray));
+      }
+    };
+
+    window.addEventListener('storage', syncFromStorage);
+    return () => window.removeEventListener('storage', syncFromStorage);
+  }, []);
 
   const t = useCallback<TranslateFn>(
     (key, vars) => interpolate(strings[key][lang], vars),
