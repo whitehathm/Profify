@@ -43,12 +43,14 @@ export interface Tutor {
   slots: string[];
   phone: string;
   reviews: Review[];
+  ownerId?: string | null;
 }
 
 export interface Booking {
   id: string;
   tutorId: string;
   studentId: string;
+  studentUserId?: string | null;
   studentName: string;
   studentPhone: string;
   date: string;

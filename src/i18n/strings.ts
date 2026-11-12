@@ -170,9 +170,59 @@ export const strings = {
   fieldEmail: { ar: 'البريد الإلكتروني', fr: 'E-mail', en: 'Email' },
   fieldPassword: { ar: 'كلمة المرور', fr: 'Mot de passe', en: 'Password' },
   authDemoHint: {
-    ar: 'وضع تجريبي: أي بريد صالح وكلمة مرور من 6 أحرف تكفي.',
-    fr: 'Mode démo : tout e-mail valide et un mot de passe de 6 caractères suffisent.',
-    en: 'Demo mode: any valid email and a password of 6+ characters will work.',
+    ar: 'تتم إدارة حسابك بأمان عبر Supabase. قد تحتاج إلى تأكيد بريدك الإلكتروني بعد التسجيل.',
+    fr: 'Votre compte est géré de manière sécurisée par Supabase. Une confirmation par e-mail peut être demandée après l’inscription.',
+    en: 'Your account is securely managed by Supabase. Email confirmation may be required after sign-up.',
+  },
+  authCheckEmail: {
+    ar: 'تحقق من بريدك الإلكتروني لتأكيد حسابك قبل تسجيل الدخول.',
+    fr: 'Vérifiez votre e-mail pour confirmer votre compte avant de vous connecter.',
+    en: 'Check your email to confirm your account before signing in.',
+  },
+  authUnavailable: {
+    ar: 'خدمة تسجيل الدخول غير مهيأة حالياً. حاول مرة أخرى لاحقاً.',
+    fr: 'Le service de connexion n’est pas configuré. Réessayez plus tard.',
+    en: 'Sign-in is not configured right now. Please try again later.',
+  },
+  authInvalidCredentials: {
+    ar: 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+    fr: 'Adresse e-mail ou mot de passe incorrect.',
+    en: 'Invalid email or password.',
+  },
+  authEmailNotConfirmed: {
+    ar: 'أكد بريدك الإلكتروني من رسالة التأكيد ثم حاول تسجيل الدخول مجدداً.',
+    fr: 'Confirmez votre adresse avec l’e-mail reçu puis réessayez.',
+    en: 'Confirm your email from the message we sent, then try again.',
+  },
+  authWeakPassword: {
+    ar: 'اختر كلمة مرور أقوى.',
+    fr: 'Choisissez un mot de passe plus robuste.',
+    en: 'Please choose a stronger password.',
+  },
+  authInvalidEmail: {
+    ar: 'أدخل عنوان بريد إلكتروني صالحاً.',
+    fr: 'Saisissez une adresse e-mail valide.',
+    en: 'Please enter a valid email address.',
+  },
+  authEmailNotAuthorized: {
+    ar: 'تعذر إرسال رسالة التأكيد إلى هذا البريد. استخدم بريداً آخر.',
+    fr: 'Nous ne pouvons pas envoyer de confirmation à cette adresse. Utilisez-en une autre.',
+    en: 'We cannot send a confirmation email to that address. Please use another one.',
+  },
+  authValidationFailed: {
+    ar: 'تحقق من البيانات التي أدخلتها.',
+    fr: 'Vérifiez les informations saisies.',
+    en: 'Please check the details you entered.',
+  },
+  authRateLimit: {
+    ar: 'محاولات كثيرة. انتظر قليلاً ثم حاول مجدداً.',
+    fr: 'Trop de tentatives. Patientez un instant avant de réessayer.',
+    en: 'Too many attempts. Please wait a moment and try again.',
+  },
+  authUnexpected: {
+    ar: 'تعذر إكمال الطلب. حاول مرة أخرى.',
+    fr: 'Impossible de terminer la demande. Réessayez.',
+    en: 'Unable to complete the request. Please try again.',
   },
   previewAs: { ar: 'عرض الواجهة كـ', fr: 'Aperçu en tant que', en: 'Preview as' },
   roleVisitor: { ar: 'زائر', fr: 'Visiteur', en: 'Visitor' },
@@ -278,6 +328,21 @@ export const strings = {
     ar: 'تم إنشاء ملفك وإضافته إلى نتائج البحث',
     fr: 'Votre profil a été créé et ajouté aux résultats',
     en: 'Your profile was created and added to search results',
+  },
+  tutorSaveFailed: {
+    ar: 'تعذر حفظ الملف. حاول مرة أخرى.',
+    fr: 'Impossible d’enregistrer le profil. Réessayez.',
+    en: 'Could not save the profile. Please try again.',
+  },
+  bookingSaveFailed: {
+    ar: 'تعذر إرسال طلب الحجز. حاول مرة أخرى.',
+    fr: 'Impossible d’envoyer la demande. Réessayez.',
+    en: 'Could not send the booking request. Please try again.',
+  },
+  bookingUpdateFailed: {
+    ar: 'تعذر تحديث حالة الحجز. تأكد من تسجيل الدخول بصفتك الطرف المعني.',
+    fr: 'Impossible de modifier la réservation. Vérifiez votre connexion et vos droits.',
+    en: 'Could not update this booking. Sign in as the student or tutor linked to it.',
   },
   footerText: {
     ar: 'Profify يربط الطلبة بأساتذة موثوقين في جميع أنحاء المغرب.',

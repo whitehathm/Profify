@@ -8,12 +8,12 @@ import { StatusBadge } from '@/components/ui/Badges';
 import { formatDate, formatNumber } from '@/lib/format';
 
 export function StudentDashboard() {
-  const { lang, t, bookings, savedIds, tutors, setBookingStatus, setRole, openModal } = useApp();
+  const { lang, t, user, bookings, savedIds, tutors, setBookingStatus, setRole, openModal } = useApp();
   const studentBookings = useMemo(
     () => bookings
-      .filter((booking) => booking.studentId === CURRENT_STUDENT_ID)
+      .filter((booking) => user ? booking.studentUserId === user.id : booking.studentId === CURRENT_STUDENT_ID)
       .sort((first, second) => first.date.localeCompare(second.date) || first.time.localeCompare(second.time)),
-    [bookings],
+    [bookings, user],
   );
   const savedTutors = tutors.filter((tutor) => savedIds.includes(tutor.id));
   const pendingCount = studentBookings.filter((booking) => booking.status === 'pending').length;

@@ -24,6 +24,8 @@ export function BecomeTutorModal() {
   const [modes, setModes] = useState<TeachingMode[]>([]);
   const [bio, setBio] = useState('');
   const [errors, setErrors] = useState<OnboardingErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const toggleMode = (mode: TeachingMode) => {
     setModes((current) => current.includes(mode)
@@ -31,8 +33,9 @@ export function BecomeTutorModal() {
       : [...current, mode]);
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setSubmitError(null);
     const rate = Number(hourlyRate);
     const nextErrors: OnboardingErrors = {};
 
@@ -49,28 +52,39 @@ export function BecomeTutorModal() {
     const subject = SUBJECTS.find((item) => item.id === subjectId);
     if (!subject) return;
 
-    addTutor({
-      name: name.trim(),
-      headline: subject.label,
-      avatar: '',
-      cityId,
-      subjectIds: [subjectId],
-      pricePerHour: rate,
-      rating: 0,
-      reviewCount: 0,
-      verified: false,
-      published: true,
-      modes,
-      experienceYears: 0,
-      bio: { ar: bio.trim(), fr: bio.trim(), en: bio.trim() },
-      qualifications: [],
-      availableDays: [0, 1, 2, 3, 4, 5, 6],
-      slots: ['10:00', '14:00', '18:00'],
-      phone: '',
-      reviews: [],
-    });
-    notify(t('tutorProfileSaved'));
-    closeModal();
+    setIsSubmitting(true);
+    try {
+      const tutor = await addTutor({
+        name: name.trim(),
+        headline: subject.label,
+        avatar: '',
+        cityId,
+        subjectIds: [subjectId],
+        pricePerHour: rate,
+        rating: 0,
+        reviewCount: 0,
+        verified: false,
+        published: true,
+        modes,
+        experienceYears: 0,
+        bio: { ar: bio.trim(), fr: bio.trim(), en: bio.trim() },
+        qualifications: [],
+        availableDays: [0, 1, 2, 3, 4, 5, 6],
+        slots: ['10:00', '14:00', '18:00'],
+        phone: '',
+        reviews: [],
+      });
+      if (!tutor) {
+        setSubmitError(t('tutorSaveFailed'));
+        return;
+      }
+      notify(t('tutorProfileSaved'));
+      closeModal();
+    } catch {
+      setSubmitError(t('tutorSaveFailed'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -79,12 +93,13 @@ export function BecomeTutorModal() {
       onClose={closeModal}
       size="lg"
       footer={(
-        <Button type="submit" form="become-tutor-form" block>
+        <Button type="submit" form="become-tutor-form" block disabled={isSubmitting}>
           {t('submitTutorProfile')}
         </Button>
       )}
     >
       <form id="become-tutor-form" onSubmit={handleSubmit} noValidate className="space-y-5">
+        {submitError && <p role="alert" className="text-sm text-error-600">{submitError}</p>}
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label={t('fieldName')} error={errors.name}>
             <TextInput

@@ -15,26 +15,49 @@ interface AuthErrors {
 }
 
 export function AuthModal({ initialMode }: { initialMode: AuthMode }) {
-  const { t, signIn, notify, closeModal } = useApp();
+  const { t, loginWithPassword, registerWithPassword, notify, closeModal } = useApp();
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<AuthErrors>({});
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const nextErrors: AuthErrors = {};
     if (mode === 'register' && fullName.trim().length < 2) nextErrors.name = t('errName');
     if (!isValidEmail(email)) nextErrors.email = t('errEmail');
     if (password.length < 6) nextErrors.password = t('errPassword');
     setErrors(nextErrors);
+    setFormError(null);
     if (Object.keys(nextErrors).length > 0) return;
 
-    const name = fullName.trim() || email.trim().split('@')[0];
-    signIn({ name, email: email.trim() });
-    notify(t('toastWelcome', { name }));
-    closeModal();
+    setIsSubmitting(true);
+    try {
+      const name = fullName.trim() || email.trim().split('@')[0];
+      const result = mode === 'login'
+        ? await loginWithPassword(email, password)
+        : await registerWithPassword(name, email, password);
+
+      if (result.error) {
+        setFormError(t(result.error));
+        return;
+      }
+      if (result.needsEmailConfirmation) {
+        notify(t('authCheckEmail'));
+        closeModal();
+        return;
+      }
+
+      notify(t('toastWelcome', { name }));
+      closeModal();
+    } catch {
+      setFormError(t('authUnexpected'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -42,7 +65,7 @@ export function AuthModal({ initialMode }: { initialMode: AuthMode }) {
       title={mode === 'login' ? t('loginTitle') : t('registerTitle')}
       onClose={closeModal}
       footer={
-        <Button type="submit" form="auth-form" block>
+        <Button type="submit" form="auth-form" block disabled={isSubmitting}>
           {mode === 'login' ? t('login') : t('register')}
         </Button>
       }
@@ -54,6 +77,7 @@ export function AuthModal({ initialMode }: { initialMode: AuthMode }) {
           onChange={(next) => {
             setMode(next);
             setErrors({});
+            setFormError(null);
           }}
           options={[
             { value: 'login', label: t('login') },
@@ -85,6 +109,7 @@ export function AuthModal({ initialMode }: { initialMode: AuthMode }) {
               onChange={(event) => setPassword(event.target.value)}
             />
           </Field>
+          {formError && <p role="alert" className="text-sm text-error-600">{formError}</p>}
           <p className="rounded-xl bg-accent-50 px-4 py-3 text-xs leading-relaxed text-accent-800 ring-1 ring-accent-100">
             {t('authDemoHint')}
           </p>
