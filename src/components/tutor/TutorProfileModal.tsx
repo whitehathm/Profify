@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CalendarDays, Heart, Phone } from 'lucide-react';
+import { CalendarDays, Heart, MapPin, Phone } from 'lucide-react';
 import { cityLabel, subjectLabel } from '@/data/catalog';
 import { useApp } from '@/context/AppContext';
 import { Avatar, RatingStars } from '@/components/ui/Avatar';
@@ -48,50 +48,65 @@ export function TutorProfileModal({ tutorId }: { tutorId: string }) {
       }
     >
       <div className="space-y-8">
-        <div className="flex items-start gap-4">
-          <Avatar src={tutor.avatar} name={tutor.name} size="xl" />
-          <div className="min-w-0 flex-1 space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
+        <div className="space-y-5">
+          <div className="relative aspect-[16/8] min-h-52 overflow-hidden rounded-3xl bg-primary-50 sm:aspect-[16/7]">
+            {tutor.avatar ? (
+              <img src={tutor.avatar} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full items-center justify-center">
+                <Avatar src={tutor.avatar} name={tutor.name} size="xl" className="rounded-full" />
+              </div>
+            )}
+            <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-3 bg-gradient-to-t from-primary-950/90 via-primary-950/35 to-transparent px-4 pb-4 pt-14 sm:px-6 sm:pb-5">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-white">
+                <span className="inline-flex items-center gap-1.5">
+                  <MapPin className="h-4 w-4" aria-hidden="true" />
+                  {cityLabel(tutor.cityId, lang)}
+                </span>
+                {tutor.modes.map((mode) => (
+                  <ModeTag key={mode} mode={mode} />
+                ))}
+              </div>
               {tutor.verified && <VerifiedBadge />}
             </div>
-            <p className="text-sm text-slate-600">{cityLabel(tutor.cityId, lang)}</p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-3">
               {tutor.reviewCount > 0 || tutor.verified ? (
                 <RatingStars rating={tutor.rating} count={tutor.reviewCount > 0 ? tutor.reviewCount : undefined} />
               ) : (
-                <span className="text-sm text-slate-600">{t('newTutor')}</span>
+                <span className="rounded-full bg-primary-50 px-2.5 py-1 text-sm font-semibold text-primary-800">{t('newTutor')}</span>
               )}
               {tutor.experienceYears > 0 && (
                 <span className="text-sm text-slate-600">{t('experience', { years: tutor.experienceYears })}</span>
               )}
             </div>
-            <div className="flex flex-wrap items-center gap-3 pt-1">
-              <span className="text-lg font-bold text-primary-900">
-                {tutor.pricePerHour} {t('currency')} <span className="text-sm font-medium text-slate-600">{t('perHour')}</span>
-              </span>
-              <button
-                type="button"
-                aria-pressed={saved}
-                onClick={() => {
-                  toggleSaved(tutor.id);
-                  notify(saved ? t('toastRemoved') : t('toastSaved'));
-                }}
-                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:border-error-200 hover:bg-error-50"
-              >
-                <Heart className={`h-4 w-4 ${saved ? 'fill-error-500 text-error-500' : ''}`} aria-hidden="true" />
-                {saved ? t('removeFromSaved') : t('addToSaved')}
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-1.5 pt-1">
+            <span className="text-xl font-bold text-primary-950">
+              {tutor.pricePerHour} {t('currency')} <span className="text-sm font-medium text-slate-600">{t('perHour')}</span>
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-secondary-200 pb-5">
+            <div className="flex flex-wrap gap-1.5">
               {tutor.subjectIds.map((id) => (
-                <span key={id} className="rounded-lg bg-primary-50 px-2.5 py-1 text-xs font-medium text-primary-800">
+                <span key={id} className="rounded-full bg-primary-50 px-2.5 py-1 text-xs font-medium text-primary-800">
                   {subjectLabel(id, lang)}
                 </span>
               ))}
-              {tutor.modes.map((mode) => (
-                <ModeTag key={mode} mode={mode} />
-              ))}
             </div>
+            <button
+              type="button"
+              aria-pressed={saved}
+              onClick={() => {
+                toggleSaved(tutor.id);
+                notify(saved ? t('toastRemoved') : t('toastSaved'));
+              }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-secondary-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-700"
+            >
+              <Heart className={`h-4 w-4 ${saved ? 'fill-error-500 text-error-500' : ''}`} aria-hidden="true" />
+              {saved ? t('removeFromSaved') : t('addToSaved')}
+            </button>
           </div>
         </div>
 

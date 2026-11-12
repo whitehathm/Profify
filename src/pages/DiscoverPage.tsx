@@ -36,15 +36,15 @@ export function DiscoverPage() {
   const filterPanel = <FilterPanel filters={filters} onChange={patch} onReset={reset} />;
 
   return (
-    <div className="bg-white min-h-screen text-slate-900">
+    <div className="min-h-screen bg-white text-primary-950">
       <HeroSearch filters={filters} onChange={patch} onSearch={scrollToResults} />
 
       <section id="results" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-10 sm:px-6 lg:flex lg:gap-8">
         <aside className="hidden w-72 shrink-0 lg:block">
-          <div className="sticky top-24 rounded-2xl bg-white p-6 shadow-sm border border-slate-900/10 ring-1 ring-slate-900/5">
-            <div className="mb-6 flex items-center gap-2 text-slate-900">
-              <SlidersHorizontal className="h-4 w-4 text-[#6366F1]" aria-hidden="true" />
-              <h2 className="font-bold text-lg text-[#0F172A]">{t('filtersTitle')}</h2>
+          <div className="sticky top-24 rounded-3xl border border-secondary-200 bg-white p-6 shadow-card">
+            <div className="mb-6 flex items-center gap-2 text-primary-950">
+              <SlidersHorizontal className="h-4 w-4 text-primary-500" aria-hidden="true" />
+              <h2 className="text-lg font-bold">{t('filtersTitle')}</h2>
             </div>
             {filterPanel}
           </div>
@@ -73,7 +73,7 @@ export function DiscoverPage() {
           title={t('filtersTitle')}
           onClose={() => setDrawerOpen(false)}
           footer={
-            <Button block onClick={() => setDrawerOpen(false)} className="bg-[#6366F1] text-white border border-[#6366F1] font-bold hover:bg-[#4F46E5] rounded-xl">
+            <Button variant="accent" block onClick={() => setDrawerOpen(false)}>
               {t('showResults', { count: formatNumber(results.length) })}
             </Button>
           }

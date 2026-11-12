@@ -26,9 +26,9 @@ export function Segmented<T extends string>({ label, options, value, onChange, c
             role="radio"
             aria-checked={active}
             onClick={() => onChange(option.value)}
-            className={`flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg font-medium transition duration-200 ${
+            className={`flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg font-medium transition-colors duration-200 ${
               compact ? 'px-2.5 py-1.5 text-xs' : 'px-3.5 py-2 text-sm'
-            } ${active ? 'bg-white text-primary-900 shadow-sm' : 'text-slate-600 hover:text-primary-900'}`}
+            } ${active ? 'bg-primary-950 text-white shadow-sm' : 'text-slate-600 hover:text-primary-700'}`}
           >
             {option.icon}
             {option.label}

@@ -34,7 +34,7 @@ export function StudentDashboard() {
 
       <section aria-label={t('studentTitle')} className="grid gap-3 sm:grid-cols-3">
         <MetricCard icon={<Bookmark className="h-4 w-4 text-primary-600" aria-hidden="true" />} label={t('statSaved')} value={savedIds.length} />
-        <MetricCard icon={<Clock className="h-4 w-4 text-warning-600" aria-hidden="true" />} label={t('statPending')} value={pendingCount} />
+        <MetricCard icon={<Clock className="h-4 w-4 text-primary-600" aria-hidden="true" />} label={t('statPending')} value={pendingCount} />
         <MetricCard icon={<CheckCircle2 className="h-4 w-4 text-success-600" aria-hidden="true" />} label={t('statConfirmed')} value={confirmedCount} />
       </section>
 

@@ -2,16 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: light;
+  --profify-coral: #FF5A79;
+  --profify-coral-rgb: 255 90 121;
+  --profify-charcoal: #121117;
+  --profify-charcoal-rgb: 18 17 23;
+  --profify-white: #FFFFFF;
+  --profify-blush: #FFF0F3;
+  --profify-blush-rgb: 255 240 243;
+  --profify-amber: #F59E0B;
+  --profify-amber-rgb: 245 158 11;
+  --profify-emerald: #10B981;
+  --profify-emerald-rgb: 16 185 129;
+  --profify-neutral: #F7F7F5;
+  --profify-neutral-rgb: 247 247 245;
+  --profify-border: #EAEAEA;
+  --profify-border-rgb: 234 234 234;
+}
+
 html,
 body,
 #root,
 main {
   min-height: 100%;
-  background-color: #FFFFFF;
-  color: #0F172A;
+  background-color: var(--profify-white);
+  color: var(--profify-charcoal);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: var(--profify-blush);
+  color: var(--profify-charcoal);
 }
 
 :focus-visible {
-  outline: 2px solid #6366F1;
+  outline: 2px solid var(--profify-coral);
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

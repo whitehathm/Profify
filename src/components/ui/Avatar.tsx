@@ -27,7 +27,7 @@ export function Avatar({ src, name, size = 'md', className = '' }: AvatarProps) 
     return (
       <div
         aria-hidden="true"
-        className={`flex shrink-0 items-center justify-center rounded-2xl bg-primary-800 font-bold text-white ${SIZES[size]} ${className}`}
+        className={`flex shrink-0 items-center justify-center rounded-2xl bg-primary-50 font-bold text-primary-700 ring-1 ring-primary-100 ${SIZES[size]} ${className}`}
       >
         {initials}
       </div>
@@ -47,7 +47,7 @@ export function Avatar({ src, name, size = 'md', className = '' }: AvatarProps) 
 export function RatingStars({ rating, count, className = '' }: { rating: number; count?: number; className?: string }) {
   return (
     <span className={`inline-flex items-center gap-1 text-sm ${className}`}>
-      <Star className="h-4 w-4 fill-amber-400 text-amber-500" aria-hidden="true" />
+      <Star className="h-4 w-4 fill-warning-500 text-warning-500" aria-hidden="true" />
       <span className="font-semibold text-primary-950">{rating.toFixed(1)}</span>
       {count !== undefined && <span className="text-slate-500">({count})</span>}
     </span>

@@ -16,7 +16,7 @@ interface HeroSearchProps {
 function SearchField({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
-      <span className="mb-1.5 block px-1 text-xs font-bold text-slate-900">{label}</span>
+      <span className="mb-1.5 block px-1 text-xs font-semibold text-primary-950">{label}</span>
       {children}
     </div>
   );
@@ -26,29 +26,33 @@ export function HeroSearch({ filters, onChange, onSearch }: HeroSearchProps) {
   const { t, lang, openModal } = useApp();
 
   return (
-    <section className="relative isolate overflow-hidden bg-white text-slate-900 border-b border-slate-200">
-      <div className="mx-auto max-w-7xl px-4 pb-14 pt-10 sm:px-6 sm:pb-20 sm:pt-16 lg:pt-20">
+    <section className="relative isolate border-b border-secondary-200 bg-white text-primary-950">
+      <div className="mx-auto max-w-7xl px-4 pb-10 pt-10 sm:px-6 sm:pb-14 sm:pt-14 lg:pb-16 lg:pt-16">
         <div className="max-w-3xl animate-slide-up">
-          <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-[#6366F1] border border-indigo-200">
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary-100 bg-primary-50 px-3.5 py-1.5 text-xs font-semibold text-primary-800">
+            <span className="h-2 w-2 rounded-full bg-primary-500" aria-hidden="true" />
             {t('tagline')}
           </span>
-          <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-[#0F172A] sm:text-5xl lg:text-6xl leading-[1.15]">
+          <h1 className="mt-5 text-4xl font-extrabold leading-[1.12] tracking-tight text-primary-950 sm:text-5xl lg:text-6xl">
             {lang === 'ar' ? (
               <>
-                ابحث عن <span className="text-[#6366F1]">أستاذك المثالي</span> لدروس الدعم واللغات في المغرب
+                ابحث عن <span className="text-primary-700">أستاذك المثالي</span> لدروس الدعم واللغات في المغرب
               </>
+            ) : lang === 'fr' ? (
+              <>Trouvez le <span className="text-primary-700">professeur idéal</span></>
             ) : (
-              t('heroTitle')
+              <>Find your <span className="text-primary-700">perfect tutor</span></>
             )}
           </h1>
-          <p className="mt-4 text-base font-normal leading-relaxed text-slate-600 sm:text-lg">
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
             {t('heroSubtitle')}
           </p>
           <Button
             type="button"
+            variant="accent"
             onClick={() => openModal({ type: 'become-tutor' })}
             icon={<GraduationCap className="h-4 w-4" aria-hidden="true" />}
-            className="mt-5 w-full sm:w-auto"
+            className="mt-6 w-full sm:w-auto"
           >
             {t('becomeTutor')}
           </Button>
@@ -59,7 +63,7 @@ export function HeroSearch({ filters, onChange, onSearch }: HeroSearchProps) {
             event.preventDefault();
             onSearch();
           }}
-          className="mt-8 grid gap-4 rounded-2xl bg-white p-5 shadow-lg border border-slate-900/10 ring-1 ring-slate-900/5 animate-slide-up sm:grid-cols-[1.3fr_1fr_1fr_auto] sm:items-end"
+          className="mt-8 grid gap-4 rounded-3xl border border-secondary-200 bg-white p-4 shadow-card sm:p-5 lg:grid-cols-[1.3fr_1fr_1fr_auto] lg:items-end"
         >
           <SearchField label={t('fieldSubject')}>
             <SubjectCombobox value={filters.subjectId} onChange={(subjectId) => onChange({ subjectId })} />
@@ -67,7 +71,7 @@ export function HeroSearch({ filters, onChange, onSearch }: HeroSearchProps) {
 
           <SearchField label={t('fieldCity')}>
             <select
-              className={`${inputClass} bg-white text-slate-900 border-slate-300 focus:border-[#6366F1] focus:ring-[#6366F1]`}
+              className={`${inputClass} bg-white text-primary-950`}
               value={filters.cityId ?? ''}
               onChange={(event) => onChange({ cityId: event.target.value || null })}
             >
@@ -82,7 +86,7 @@ export function HeroSearch({ filters, onChange, onSearch }: HeroSearchProps) {
 
           <SearchField label={t('fieldMode')}>
             <select
-              className={`${inputClass} bg-white text-slate-900 border-slate-300 focus:border-[#6366F1] focus:ring-[#6366F1]`}
+              className={`${inputClass} bg-white text-primary-950`}
               value={filters.mode}
               onChange={(event) => onChange({ mode: event.target.value as TutorFilters['mode'] })}
             >
@@ -92,28 +96,29 @@ export function HeroSearch({ filters, onChange, onSearch }: HeroSearchProps) {
             </select>
           </SearchField>
 
-          <Button
-            type="submit"
-            size="lg"
-            icon={<Search className="h-4 w-4" />}
-            className="w-full sm:w-auto bg-[#6366F1] hover:bg-[#4F46E5] text-white border border-[#6366F1] font-bold shadow-sm rounded-xl px-6 py-3"
-          >
+          <Button type="submit" size="lg" icon={<Search className="h-4 w-4" aria-hidden="true" />} className="w-full px-6 sm:w-auto">
             {t('searchButton')}
           </Button>
         </form>
 
         <div className="mt-6 flex flex-wrap items-center gap-2">
-          <span className="text-sm font-semibold text-slate-600">{t('popularSubjects')}</span>
-          {POPULAR_SUBJECT_IDS.map((id) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => onChange({ subjectId: id })}
-              className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-800 border border-slate-200 transition hover:bg-[#6366F1] hover:text-white hover:border-[#4F46E5]"
-            >
-              {subjectLabel(id, lang)}
-            </button>
-          ))}
+          <span className="me-1 text-sm font-semibold text-slate-600">{t('popularSubjects')}</span>
+          {POPULAR_SUBJECT_IDS.map((id) => {
+            const active = filters.subjectId === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={active}
+                onClick={() => onChange({ subjectId: active ? null : id })}
+                className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${active
+                  ? 'border-primary-300 bg-primary-50 text-primary-800'
+                  : 'border-secondary-200 bg-white text-slate-700 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-800'}`}
+              >
+                {subjectLabel(id, lang)}
+              </button>
+            );
+          })}
         </div>
       </div>
     </section>
