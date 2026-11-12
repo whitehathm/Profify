@@ -24,6 +24,24 @@ export const strings = {
   fieldSubject: { ar: 'المادة', fr: 'Matière', en: 'Subject' },
   fieldCity: { ar: 'المدينة', fr: 'Ville', en: 'City' },
   fieldMode: { ar: 'طريقة الدرس', fr: 'Mode', en: 'Mode' },
+  becomeTutor: { ar: 'انضم كأستاذ', fr: 'Devenir professeur', en: 'Become a tutor' },
+  becomeTutorTitle: {
+    ar: 'أنشئ ملفك كأستاذ على Profify',
+    fr: 'Créez votre profil de professeur sur Profify',
+    en: 'Create your tutor profile on Profify',
+  },
+  submitTutorProfile: {
+    ar: 'حفظ الملف والانضمام',
+    fr: 'Enregistrer le profil',
+    en: 'Save profile and join',
+  },
+  chooseTutorCity: { ar: 'اختر المدينة', fr: 'Choisissez une ville', en: 'Choose a city' },
+  chooseTutorSubject: { ar: 'اختر المادة', fr: 'Choisissez une matière', en: 'Choose a subject' },
+  bioLanguageHint: {
+    ar: 'سيظهر هذا النص كما كتبته في واجهات اللغات الثلاث.',
+    fr: 'Ce texte apparaîtra tel quel dans les trois langues de l’interface.',
+    en: 'This text will appear as entered in all three interface languages.',
+  },
   searchButton: { ar: 'بحث', fr: 'Rechercher', en: 'Search' },
   allSubjects: { ar: 'كل المواد', fr: 'Toutes les matières', en: 'All subjects' },
   allCities: { ar: 'كل المدن', fr: 'Toutes les villes', en: 'All cities' },
@@ -31,6 +49,7 @@ export const strings = {
   modeOnline: { ar: 'عن بُعد', fr: 'En ligne', en: 'Online' },
   modeInPerson: { ar: 'حضوري', fr: 'Présentiel', en: 'In person' },
   verifiedBadge: { ar: 'أستاذ موثوق', fr: 'Vérifié', en: 'Verified' },
+  newTutor: { ar: 'أستاذ جديد', fr: 'Nouveau professeur', en: 'New tutor' },
   currency: { ar: 'د.م', fr: 'MAD', en: 'MAD' },
   perHour: { ar: '/ ساعة', fr: '/ h', en: '/ hr' },
   reviewsCount: { ar: '({count} تقييم)', fr: '({count} avis)', en: '({count} reviews)' },
@@ -113,6 +132,18 @@ export const strings = {
     en: 'Enter a valid Moroccan phone number',
   },
   errSlot: { ar: 'اختر اليوم والساعة', fr: "Choisissez le jour et l’heure", en: 'Choose a day and time' },
+  errTutorCity: { ar: 'اختر مدينتك', fr: 'Choisissez votre ville', en: 'Choose your city' },
+  errTutorSubject: { ar: 'اختر مادة واحدة على الأقل', fr: 'Choisissez une matière', en: 'Choose a subject' },
+  errTutorRate: {
+    ar: 'أدخل سعراً صحيحاً بين 10 و2000 درهم',
+    fr: 'Saisissez un tarif entier entre 10 et 2 000 MAD',
+    en: 'Enter a whole rate between 10 and 2,000 MAD',
+  },
+  errTutorBio: {
+    ar: 'اكتب نبذة من 20 حرفاً على الأقل',
+    fr: 'Rédigez une présentation de 20 caractères minimum',
+    en: 'Enter a bio with at least 20 characters',
+  },
   errEmail: { ar: 'البريد الإلكتروني غير صالح', fr: 'Adresse e-mail invalide', en: 'Invalid email address' },
   errPassword: {
     ar: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
@@ -243,6 +274,11 @@ export const strings = {
   toastWelcome: { ar: 'مرحباً، {name}!', fr: 'Bienvenue, {name} !', en: 'Welcome, {name}!' },
   toastLoggedOut: { ar: 'تم تسجيل خروجك', fr: 'Vous êtes déconnecté', en: 'You have been logged out' },
   toastListingSaved: { ar: 'تم تحديث الإعلان', fr: 'Annonce mise à jour', en: 'Listing updated' },
+  tutorProfileSaved: {
+    ar: 'تم إنشاء ملفك وإضافته إلى نتائج البحث',
+    fr: 'Votre profil a été créé et ajouté aux résultats',
+    en: 'Your profile was created and added to search results',
+  },
   footerText: {
     ar: 'Profify يربط الطلبة بأساتذة موثوقين في جميع أنحاء المغرب.',
     fr: 'Profify relie les élèves à des professeurs de confiance partout au Maroc.',

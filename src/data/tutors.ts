@@ -3,6 +3,35 @@ import { photoUrl } from '@/data/catalog';
 
 export const TUTORS: Tutor[] = [
   {
+    id: 'featured-el-houcine-miftah',
+    name: 'El Houcine Miftah (الحسين مفتاح)',
+    headline: {
+      ar: 'دراسات اللغة الإنجليزية ومحادثة الكبار A1–B2 والتحضير للاختبارات',
+      fr: 'Études anglaises, conversation adulte A1–B2 et préparation aux examens',
+      en: 'English Studies, A1–B2 adult conversation and exam prep',
+    },
+    avatar: '',
+    cityId: 'casablanca',
+    subjectIds: ['english'],
+    pricePerHour: 150,
+    rating: 5,
+    reviewCount: 0,
+    verified: true,
+    published: true,
+    modes: ['online', 'in_person'],
+    experienceYears: 3,
+    bio: {
+      ar: 'مدرّس إنجليزية بخبرة تتجاوز 3 سنوات في مراكز لغات خاصة بالدار البيضاء. أختص في تواصل البالغين من A1 إلى B2، وبناء الثقة في التحدث العملي، والتدريب الفردي المخصص.',
+      fr: 'Formateur en anglais avec plus de 3 ans d’expérience dans des centres de langues privés à Casablanca. Spécialisé dans la communication pour adultes A1–B2, l’aisance à l’oral et le coaching individuel personnalisé.',
+      en: 'English tutor with 3+ years of experience at private language centers in Casablanca. I specialize in A1–B2 adult communication, practical speaking confidence, and personalized one-to-one coaching.',
+    },
+    qualifications: [],
+    availableDays: [0, 1, 2, 3, 4, 5, 6],
+    slots: ['10:00', '14:00', '17:00', '19:00'],
+    phone: '',
+    reviews: [],
+  },
+  {
     id: 't1',
     name: 'Salma Berrada',
     headline: {

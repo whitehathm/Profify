@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import type { Booking, BookingStatus, Lang, ModalState, Role, TeachingMode, Toast, Tutor } from '@/types';
+import type { Booking, BookingStatus, Lang, Localized, ModalState, Review, Role, TeachingMode, Toast, Tutor } from '@/types';
 import { TUTORS } from '@/data/tutors';
 import { SEED_BOOKINGS } from '@/data/bookings';
 import { CURRENT_STUDENT_ID } from '@/data/catalog';
@@ -32,6 +32,7 @@ interface AppContextValue {
   signIn: (user: CurrentUser) => void;
   signOut: () => void;
   tutors: Tutor[];
+  addTutor: (profile: Omit<Tutor, 'id'>) => Tutor;
   updateTutor: (id: string, patch: Partial<Tutor>) => void;
   savedIds: string[];
   toggleSaved: (id: string) => void;
@@ -88,11 +89,67 @@ function readStorageArray<T>(key: string, fallback: T[], isValid: (value: unknow
   }
 }
 
+const CUSTOM_TUTORS_STORAGE_KEY = 'profify:custom-tutors:v1';
+
+function isLocalizedText(value: unknown): value is Localized {
+  if (!value || typeof value !== 'object') return false;
+  const localized = value as Partial<Localized>;
+  return typeof localized.ar === 'string' && typeof localized.fr === 'string' && typeof localized.en === 'string';
+}
+
+function isReview(value: unknown): value is Review {
+  if (!value || typeof value !== 'object') return false;
+  const review = value as Partial<Review>;
+  return (
+    typeof review.id === 'string' &&
+    typeof review.author === 'string' &&
+    typeof review.rating === 'number' &&
+    typeof review.date === 'string' &&
+    isLocalizedText(review.comment)
+  );
+}
+
+function isTutor(value: unknown): value is Tutor {
+  if (!value || typeof value !== 'object') return false;
+  const tutor = value as Partial<Tutor>;
+  return (
+    typeof tutor.id === 'string' &&
+    typeof tutor.name === 'string' &&
+    isLocalizedText(tutor.headline) &&
+    typeof tutor.avatar === 'string' &&
+    typeof tutor.cityId === 'string' &&
+    Array.isArray(tutor.subjectIds) && tutor.subjectIds.every((id) => typeof id === 'string') &&
+    typeof tutor.pricePerHour === 'number' &&
+    typeof tutor.rating === 'number' &&
+    typeof tutor.reviewCount === 'number' &&
+    typeof tutor.verified === 'boolean' &&
+    typeof tutor.published === 'boolean' &&
+    Array.isArray(tutor.modes) && tutor.modes.every((mode) => mode === 'online' || mode === 'in_person') &&
+    typeof tutor.experienceYears === 'number' &&
+    isLocalizedText(tutor.bio) &&
+    Array.isArray(tutor.qualifications) && tutor.qualifications.every(isLocalizedText) &&
+    Array.isArray(tutor.availableDays) && tutor.availableDays.every((day) => typeof day === 'number') &&
+    Array.isArray(tutor.slots) && tutor.slots.every((slot) => typeof slot === 'string') &&
+    typeof tutor.phone === 'string' &&
+    Array.isArray(tutor.reviews) && tutor.reviews.every(isReview)
+  );
+}
+
+function isTutorArray(value: unknown): value is Tutor[] {
+  return Array.isArray(value) && value.every(isTutor);
+}
+
+function readCustomTutors(): Tutor[] {
+  const catalogIds = new Set(TUTORS.map((tutor) => tutor.id));
+  return readStorageArray(CUSTOM_TUTORS_STORAGE_KEY, [], isTutorArray)
+    .filter((tutor) => !catalogIds.has(tutor.id));
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Lang>('ar');
   const [role, setRole] = useState<Role>('visitor');
   const [user, setUser] = useState<CurrentUser | null>(null);
-  const [tutors, setTutors] = useState<Tutor[]>(TUTORS);
+  const [tutors, setTutors] = useState<Tutor[]>(() => [...TUTORS, ...readCustomTutors()]);
   const [savedIds, setSavedIds] = useState<string[]>(() =>
     readStorageArray(SAVED_TUTORS_STORAGE_KEY, [], isSavedTutorIdArray),
   );
@@ -119,12 +176,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [savedIds]);
 
   useEffect(() => {
+    const catalogIds = new Set(TUTORS.map((tutor) => tutor.id));
+    const customTutors = tutors.filter((tutor) => !catalogIds.has(tutor.id));
+    try {
+      window.localStorage.setItem(CUSTOM_TUTORS_STORAGE_KEY, JSON.stringify(customTutors));
+    } catch {
+      return;
+    }
+  }, [tutors]);
+
+  useEffect(() => {
     const syncFromStorage = (event: StorageEvent) => {
       if (event.key === null || event.key === BOOKINGS_STORAGE_KEY) {
         setBookings(readStorageArray(BOOKINGS_STORAGE_KEY, SEED_BOOKINGS, isBookingArray));
       }
       if (event.key === null || event.key === SAVED_TUTORS_STORAGE_KEY) {
         setSavedIds(readStorageArray(SAVED_TUTORS_STORAGE_KEY, [], isSavedTutorIdArray));
+      }
+      if (event.key === null || event.key === CUSTOM_TUTORS_STORAGE_KEY) {
+        setTutors([...TUTORS, ...readCustomTutors()]);
       }
     };
 
@@ -147,6 +217,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback((nextUser: CurrentUser) => setUser(nextUser), []);
   const signOut = useCallback(() => setUser(null), []);
+
+  const addTutor = useCallback((profile: Omit<Tutor, 'id'>) => {
+    const tutor: Tutor = { ...profile, id: makeId('tutor') };
+    setTutors((previous) => [...previous, tutor]);
+    return tutor;
+  }, []);
 
   const updateTutor = useCallback((id: string, patch: Partial<Tutor>) => {
     setTutors((previous) => previous.map((tutor) => (tutor.id === id ? { ...tutor, ...patch } : tutor)));
@@ -185,6 +261,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       signIn,
       signOut,
       tutors,
+      addTutor,
       updateTutor,
       savedIds,
       toggleSaved,
@@ -205,6 +282,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       signIn,
       signOut,
       tutors,
+      addTutor,
       updateTutor,
       savedIds,
       toggleSaved,

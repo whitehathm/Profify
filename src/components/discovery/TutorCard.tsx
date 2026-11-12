@@ -62,7 +62,11 @@ export function TutorCard({ tutor, index }: { tutor: Tutor; index: number }) {
       <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-slate-600">{tutor.bio[lang]}</p>
 
       <div className="mt-4 flex items-center gap-2 text-sm">
-        <RatingStars rating={tutor.rating} count={tutor.reviewCount} />
+        {tutor.reviewCount > 0 || tutor.verified ? (
+          <RatingStars rating={tutor.rating} count={tutor.reviewCount > 0 ? tutor.reviewCount : undefined} />
+        ) : (
+          <span className="text-xs font-medium text-slate-500">{t('newTutor')}</span>
+        )}
       </div>
 
       <div className="mt-3 flex flex-wrap gap-1.5">

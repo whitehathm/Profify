@@ -26,9 +26,11 @@ export function TutorProfileModal({ tutorId }: { tutorId: string }) {
       size="lg"
       footer={
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <Button variant="outline" icon={<Phone className="h-4 w-4" />} onClick={() => openModal({ type: 'contact', tutorId: tutor.id })}>
-            {t('contactTutor')}
-          </Button>
+          {tutor.phone && (
+            <Button variant="outline" icon={<Phone className="h-4 w-4" />} onClick={() => openModal({ type: 'contact', tutorId: tutor.id })}>
+              {t('contactTutor')}
+            </Button>
+          )}
           <Button
             icon={<CalendarDays className="h-4 w-4" />}
             onClick={() =>
@@ -54,8 +56,14 @@ export function TutorProfileModal({ tutorId }: { tutorId: string }) {
             </div>
             <p className="text-sm text-slate-600">{cityLabel(tutor.cityId, lang)}</p>
             <div className="flex flex-wrap items-center gap-3">
-              <RatingStars rating={tutor.rating} count={tutor.reviewCount} />
-              <span className="text-sm text-slate-600">{t('experience', { years: tutor.experienceYears })}</span>
+              {tutor.reviewCount > 0 || tutor.verified ? (
+                <RatingStars rating={tutor.rating} count={tutor.reviewCount > 0 ? tutor.reviewCount : undefined} />
+              ) : (
+                <span className="text-sm text-slate-600">{t('newTutor')}</span>
+              )}
+              {tutor.experienceYears > 0 && (
+                <span className="text-sm text-slate-600">{t('experience', { years: tutor.experienceYears })}</span>
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-3 pt-1">
               <span className="text-lg font-bold text-primary-900">
