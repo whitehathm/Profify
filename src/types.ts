@@ -7,6 +7,8 @@ export type SortOption = 'rating' | 'price_asc' | 'price_desc';
 
 export interface Subject {
   id: string;
+  code: string;
+  native: string;
   label: Localized;
 }
 

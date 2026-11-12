@@ -27,6 +27,8 @@ export type AuthErrorKey =
   | 'authRateLimit'
   | 'authUnexpected';
 
+export type View = 'discover' | 'how-it-works' | 'become-tutor' | 'contact';
+
 export interface AuthResult {
   error?: AuthErrorKey;
   needsEmailConfirmation?: boolean;
@@ -49,6 +51,8 @@ interface AppContextValue {
   t: TranslateFn;
   role: Role;
   setRole: (role: Role) => void;
+  view: View;
+  navigate: (view: View) => void;
   user: CurrentUser | null;
   loginWithPassword: (email: string, password: string) => Promise<AuthResult>;
   registerWithPassword: (name: string, email: string, password: string) => Promise<AuthResult>;
@@ -192,9 +196,38 @@ function readCustomTutors(): Tutor[] {
     .filter((tutor) => !catalogIds.has(tutor.id));
 }
 
+const LANG_STORAGE_KEY = 'profify:lang:v1';
+
+function readInitialLang(): Lang {
+  try {
+    const stored = window.localStorage.getItem(LANG_STORAGE_KEY);
+    if (stored === 'ar' || stored === 'fr' || stored === 'en') return stored;
+  } catch {
+    // Storage can be blocked; fall back to the browser language.
+  }
+  const browser = navigator.language.toLowerCase();
+  if (browser.startsWith('fr')) return 'fr';
+  if (browser.startsWith('en')) return 'en';
+  return 'ar';
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Lang>('ar');
+  const [lang, setLangState] = useState<Lang>(readInitialLang);
+  const setLang = useCallback((next: Lang) => {
+    setLangState(next);
+    try {
+      window.localStorage.setItem(LANG_STORAGE_KEY, next);
+    } catch {
+      return;
+    }
+  }, []);
   const [role, setRole] = useState<Role>('visitor');
+  const [view, setView] = useState<View>('discover');
+  const navigate = useCallback((next: View) => {
+    setView(next);
+    setRole('visitor');
+    window.scrollTo({ top: 0 });
+  }, []);
   const [user, setUser] = useState<CurrentUser | null>(null);
 
   useEffect(() => {
@@ -486,6 +519,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       t,
       role,
       setRole,
+      view,
+      navigate,
       user,
       loginWithPassword,
       registerWithPassword,
@@ -508,6 +543,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       lang,
       t,
       role,
+      view,
+      navigate,
       user,
       loginWithPassword,
       registerWithPassword,

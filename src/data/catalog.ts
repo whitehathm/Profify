@@ -9,14 +9,11 @@ export const photoUrl = (id: string) =>
 export const HERO_IMAGE = photoUrl('8199762');
 
 export const SUBJECTS: Subject[] = [
-  { id: 'maths', label: { ar: 'الرياضيات', fr: 'Mathématiques', en: 'Maths' } },
-  { id: 'physics', label: { ar: 'الفيزياء', fr: 'Physique', en: 'Physics' } },
-  { id: 'chemistry', label: { ar: 'الكيمياء', fr: 'Chimie', en: 'Chemistry' } },
-  { id: 'biology', label: { ar: 'علوم الحياة والأرض', fr: 'SVT', en: 'Biology' } },
-  { id: 'english', label: { ar: 'الإنجليزية', fr: 'Anglais', en: 'English' } },
-  { id: 'french', label: { ar: 'الفرنسية', fr: 'Français', en: 'French' } },
-  { id: 'arabic', label: { ar: 'العربية', fr: 'Arabe', en: 'Arabic' } },
-  { id: 'computer', label: { ar: 'الإعلاميات', fr: 'Informatique', en: 'Computer science' } },
+  { id: 'english', code: 'EN', native: 'English', label: { ar: 'الإنجليزية', fr: 'Anglais', en: 'English' } },
+  { id: 'french', code: 'FR', native: 'Français', label: { ar: 'الفرنسية', fr: 'Français', en: 'French' } },
+  { id: 'spanish', code: 'ES', native: 'Español', label: { ar: 'الإسبانية', fr: 'Espagnol', en: 'Spanish' } },
+  { id: 'german', code: 'DE', native: 'Deutsch', label: { ar: 'الألمانية', fr: 'Allemand', en: 'German' } },
+  { id: 'arabic', code: 'AR', native: 'العربية', label: { ar: 'العربية', fr: 'Arabe', en: 'Arabic' } },
 ];
 
 export const CITIES: City[] = [
@@ -27,8 +24,6 @@ export const CITIES: City[] = [
   { id: 'tangier', label: { ar: 'طنجة', fr: 'Tanger', en: 'Tangier' } },
   { id: 'agadir', label: { ar: 'أكادير', fr: 'Agadir', en: 'Agadir' } },
 ];
-
-export const POPULAR_SUBJECT_IDS = ['maths', 'english', 'physics'];
 
 export function subjectLabel(id: string, lang: Lang): string {
   return SUBJECTS.find((subject) => subject.id === id)?.label[lang] ?? '';

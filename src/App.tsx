@@ -1,18 +1,20 @@
 import { useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Header } from '@/components/layout/Header';
-import { DemoBar } from '@/components/layout/DemoBar';
 import { Footer } from '@/components/layout/Footer';
 import { ModalHost } from '@/components/layout/ModalHost';
 import { Toaster } from '@/components/layout/Toaster';
 import { DiscoverPage } from '@/pages/DiscoverPage';
 import { StudentDashboard } from '@/components/dashboard/StudentDashboard';
 import { TutorDashboard } from '@/components/dashboard/TutorDashboard';
+import { HowItWorksPage } from '@/pages/HowItWorksPage';
+import { ContactPage } from '@/pages/ContactPage';
+import { WhyTeachSection } from '@/components/tutor/WhyTeachSection';
 
 const DIRECTION = { ar: 'rtl', fr: 'ltr', en: 'ltr' } as const;
 
 export default function App() {
-  const { lang, role } = useApp();
+  const { lang, role, view } = useApp();
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -22,9 +24,20 @@ export default function App() {
   return (
     <div className="flex min-h-screen flex-col bg-white text-primary-950 antialiased">
       <Header />
-      <DemoBar />
       <main className="flex-1 bg-white">
-        {role === 'student' ? <StudentDashboard /> : role === 'tutor' ? <TutorDashboard /> : <DiscoverPage />}
+        {role === 'student' ? (
+          <StudentDashboard />
+        ) : role === 'tutor' ? (
+          <TutorDashboard />
+        ) : view === 'how-it-works' ? (
+          <HowItWorksPage />
+        ) : view === 'become-tutor' ? (
+          <WhyTeachSection />
+        ) : view === 'contact' ? (
+          <ContactPage />
+        ) : (
+          <DiscoverPage />
+        )}
       </main>
       <Footer />
       <ModalHost />

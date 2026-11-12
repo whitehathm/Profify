@@ -94,7 +94,7 @@ export function TutorCard({ tutor }: { tutor: Tutor }) {
             <span className="text-2xl font-extrabold tracking-tight text-primary-950">{formatNumber(tutor.pricePerHour)}</span>
             <span className="text-sm font-medium text-slate-600">{t('currency')} {t('perHour')}</span>
           </p>
-          <span className="rounded-full bg-primary-50 px-3 py-1.5 text-xs font-semibold text-primary-700">{t('bookTrial')}</span>
+          <span className="rounded-full bg-primary-50 px-3 py-1.5 text-xs font-semibold text-primary-800">{t('trialBadge')}</span>
         </div>
 
         <Button
@@ -103,7 +103,7 @@ export function TutorCard({ tutor }: { tutor: Tutor }) {
           icon={<CalendarDays className="h-4 w-4" aria-hidden="true" />}
           onClick={() => openModal({ type: 'book', tutorId: tutor.id })}
         >
-          {t('bookSession')}
+          {t('bookTrialCta')}
         </Button>
       </div>
     </article>

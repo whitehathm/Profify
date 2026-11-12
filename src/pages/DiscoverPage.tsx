@@ -5,6 +5,7 @@ import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { HeroSearch } from '@/components/discovery/HeroSearch';
+import { TrustMetricsBar } from '@/components/discovery/TrustMetricsBar';
 import { ResultsToolbar } from '@/components/discovery/ResultsToolbar';
 import { FilterPanel } from '@/components/discovery/FilterPanel';
 import { EmptyState, TutorGrid, TutorGridSkeleton } from '@/components/discovery/TutorGrid';
@@ -38,8 +39,9 @@ export function DiscoverPage() {
   return (
     <div className="min-h-screen bg-white text-primary-950">
       <HeroSearch filters={filters} onChange={patch} onSearch={scrollToResults} />
+      <TrustMetricsBar />
 
-      <section id="results" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-10 sm:px-6 lg:flex lg:gap-8">
+      <section id="results" className="mx-auto max-w-7xl scroll-mt-28 px-4 pb-16 pt-6 sm:px-6 sm:py-10 lg:flex lg:gap-8">
         <aside className="hidden w-72 shrink-0 lg:block">
           <div className="sticky top-24 rounded-3xl border border-secondary-200 bg-white p-6 shadow-card">
             <div className="mb-6 flex items-center gap-2 text-primary-950">
