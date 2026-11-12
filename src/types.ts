@@ -26,6 +26,7 @@ export interface Review {
 export interface Tutor {
   id: string;
   name: string;
+  headline: Localized;
   avatar: string;
   cityId: string;
   subjectIds: string[];

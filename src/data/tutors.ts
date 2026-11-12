@@ -5,6 +5,11 @@ export const TUTORS: Tutor[] = [
   {
     id: 't1',
     name: 'Salma Berrada',
+    headline: {
+      ar: 'رياضيات وفيزياء وتحضير للبكالوريا',
+      fr: 'Mathématiques et physique, préparation au bac',
+      en: 'Maths and physics, baccalaureate preparation',
+    },
     avatar: photoUrl('14208763'),
     cityId: 'casablanca',
     subjectIds: ['maths', 'physics'],
@@ -63,6 +68,11 @@ export const TUTORS: Tutor[] = [
   {
     id: 't2',
     name: 'Youssef El Amrani',
+    headline: {
+      ar: 'الإنجليزية والفرنسية والتحضير لاختبارات IELTS وTOEFL',
+      fr: 'Anglais et français, préparation IELTS et TOEFL',
+      en: 'English and French, IELTS and TOEFL preparation',
+    },
     avatar: photoUrl('5308640'),
     cityId: 'rabat',
     subjectIds: ['english', 'french'],
@@ -117,6 +127,11 @@ export const TUTORS: Tutor[] = [
   {
     id: 't3',
     name: 'Imane Tazi',
+    headline: {
+      ar: 'الكيمياء وعلوم الحياة والأرض للتعليم الثانوي',
+      fr: 'Chimie et sciences de la vie et de la terre au lycée',
+      en: 'High-school chemistry and life sciences',
+    },
     avatar: photoUrl('16160869'),
     cityId: 'marrakech',
     subjectIds: ['chemistry', 'biology'],
@@ -170,6 +185,11 @@ export const TUTORS: Tutor[] = [
   {
     id: 't4',
     name: 'Karim Idrissi',
+    headline: {
+      ar: 'بايثون وتطوير المواقع وتحليل البيانات',
+      fr: 'Python, développement web et analyse de données',
+      en: 'Python, web development and data analysis',
+    },
     avatar: photoUrl('6942776'),
     cityId: 'casablanca',
     subjectIds: ['computer', 'maths'],
@@ -224,6 +244,11 @@ export const TUTORS: Tutor[] = [
   {
     id: 't5',
     name: 'Nadia Chraibi',
+    headline: {
+      ar: 'اللغة العربية والفرنسية للتعليم الابتدائي والإعدادي',
+      fr: 'Arabe et français pour le primaire et le collège',
+      en: 'Arabic and French for primary and middle school',
+    },
     avatar: photoUrl('7665702'),
     cityId: 'fes',
     subjectIds: ['arabic', 'french'],
@@ -277,6 +302,11 @@ export const TUTORS: Tutor[] = [
   {
     id: 't6',
     name: 'Othmane Bennani',
+    headline: {
+      ar: 'الفيزياء والرياضيات بأسلوب عملي',
+      fr: 'Physique et mathématiques avec une approche concrète',
+      en: 'Physics and maths with a practical approach',
+    },
     avatar: photoUrl('14950779'),
     cityId: 'tangier',
     subjectIds: ['physics', 'maths'],
@@ -330,6 +360,11 @@ export const TUTORS: Tutor[] = [
   {
     id: 't7',
     name: 'Hajar Filali',
+    headline: {
+      ar: 'الإنجليزية للمبتدئين والطلاب',
+      fr: 'Anglais pour débutants et élèves',
+      en: 'English for beginners and school students',
+    },
     avatar: photoUrl('7752788'),
     cityId: 'agadir',
     subjectIds: ['english'],
@@ -383,6 +418,11 @@ export const TUTORS: Tutor[] = [
   {
     id: 't8',
     name: 'Mehdi Alaoui',
+    headline: {
+      ar: 'الرياضيات والتحضير للمدارس الهندسية',
+      fr: 'Mathématiques et préparation aux écoles d’ingénieurs',
+      en: 'Maths and engineering school preparation',
+    },
     avatar: photoUrl('804009'),
     cityId: 'rabat',
     subjectIds: ['maths'],
