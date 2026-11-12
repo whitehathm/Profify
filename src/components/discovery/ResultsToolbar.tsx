@@ -44,7 +44,7 @@ export function ResultsToolbar({ filters, onChange, resultCount, activeCount, on
             <Button variant="outline" icon={<SlidersHorizontal className="h-4 w-4" />} onClick={onOpenFilters}>
               {t('filtersButton')}
               {activeCount > 0 && (
-                <span className="rounded-full bg-accent-400 px-1.5 text-xs font-bold text-primary-950">{activeCount}</span>
+                <span className="rounded-full bg-primary-50 px-1.5 text-xs font-bold text-primary-800 ring-1 ring-primary-200">{activeCount}</span>
               )}
             </Button>
           </span>

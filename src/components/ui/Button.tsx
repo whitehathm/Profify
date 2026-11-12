@@ -4,10 +4,10 @@ type Variant = 'primary' | 'accent' | 'outline' | 'ghost';
 type Size = 'sm' | 'md' | 'lg';
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-[#6366F1] text-white font-bold shadow-sm hover:bg-[#4F46E5]',
-  accent: 'bg-[#6366F1] text-white font-bold shadow-sm hover:bg-[#4F46E5]',
-  outline: 'border border-slate-300 bg-white text-slate-900 hover:border-[#6366F1] hover:bg-indigo-50',
-  ghost: 'text-slate-900 hover:bg-indigo-50',
+  primary: 'bg-primary-950 text-white font-semibold shadow-sm hover:bg-primary-900',
+  accent: 'bg-primary-500 text-primary-950 font-semibold shadow-sm hover:bg-primary-400',
+  outline: 'border border-secondary-200 bg-white text-primary-950 hover:border-primary-300 hover:bg-primary-50',
+  ghost: 'text-primary-950 hover:bg-primary-50',
 };
 
 const SIZES: Record<Size, string> = {

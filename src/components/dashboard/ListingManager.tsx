@@ -66,7 +66,7 @@ export function ListingManager({ tutor }: ListingManagerProps) {
           <p className="mt-1 text-sm text-slate-600">{t('listingSubtitle')}</p>
         </div>
         {dirty && (
-          <span className="rounded-full bg-warning-50 px-3 py-1 text-xs font-semibold text-warning-700 ring-1 ring-warning-100 animate-scale-in">
+          <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-800 ring-1 ring-primary-100 animate-scale-in">
             {t('unsavedChanges')}
           </span>
         )}

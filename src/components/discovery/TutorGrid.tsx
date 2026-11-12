@@ -7,8 +7,8 @@ import { TutorCard } from '@/components/discovery/TutorCard';
 export function TutorGrid({ tutors }: { tutors: Tutor[] }) {
   return (
     <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-      {tutors.map((tutor, index) => (
-        <TutorCard key={tutor.id} tutor={tutor} index={index} />
+      {tutors.map((tutor) => (
+        <TutorCard key={tutor.id} tutor={tutor} />
       ))}
     </div>
   );
@@ -18,22 +18,21 @@ export function TutorGridSkeleton() {
   return (
     <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true">
       {Array.from({ length: 6 }, (_, index) => (
-        <div key={index} className="rounded-2xl bg-white p-5 ring-1 ring-slate-200/70">
-          <div className="flex items-start gap-4">
-            <div className="skeleton h-16 w-16 rounded-2xl" />
-            <div className="flex-1 space-y-3">
-              <div className="skeleton h-4 w-3/4" />
-              <div className="skeleton h-3 w-1/2" />
-              <div className="skeleton h-3 w-1/3" />
+        <div key={index} className="overflow-hidden rounded-3xl border border-secondary-200 bg-white shadow-card">
+          <div className="skeleton aspect-[4/3] w-full" />
+          <div className="space-y-3 p-4 sm:p-5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="skeleton h-4 w-24 rounded-full" />
+              <div className="skeleton h-6 w-20 rounded-full" />
             </div>
-          </div>
-          <div className="mt-5 flex gap-2">
-            <div className="skeleton h-6 w-20" />
-            <div className="skeleton h-6 w-16" />
-          </div>
-          <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
-            <div className="skeleton h-6 w-24" />
-            <div className="skeleton h-8 w-28" />
+            <div className="skeleton h-4 w-4/5" />
+            <div className="skeleton h-3 w-full" />
+            <div className="skeleton h-3 w-2/3" />
+            <div className="flex gap-2 pt-2">
+              <div className="skeleton h-6 w-20 rounded-full" />
+              <div className="skeleton h-6 w-16 rounded-full" />
+            </div>
+            <div className="skeleton mt-4 h-11 w-full rounded-xl" />
           </div>
         </div>
       ))}
@@ -44,8 +43,8 @@ export function TutorGridSkeleton() {
 export function EmptyState({ onReset }: { onReset: () => void }) {
   const { t } = useApp();
   return (
-    <div className="flex flex-col items-center rounded-2xl bg-white px-6 py-16 text-center ring-1 ring-slate-200/70 animate-fade-in">
-      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-50 text-primary-700">
+    <div className="flex flex-col items-center rounded-3xl border border-secondary-200 bg-white px-6 py-16 text-center shadow-card">
+      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-50 text-primary-700 ring-1 ring-primary-100">
         <SearchX className="h-7 w-7" aria-hidden="true" />
       </span>
       <h3 className="mt-5 text-lg font-bold text-primary-950">{t('emptyTitle')}</h3>

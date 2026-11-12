@@ -13,7 +13,7 @@ export function DemoBar() {
   ];
 
   return (
-    <div className="border-b border-slate-200 bg-white">
+    <div className="border-b border-secondary-200 bg-secondary-50">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-6">
         <span className="text-xs font-medium text-slate-500">{t('previewAs')}</span>
         <Segmented compact label={t('previewAs')} options={options} value={role} onChange={setRole} />

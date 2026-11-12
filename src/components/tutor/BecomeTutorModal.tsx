@@ -147,7 +147,7 @@ export function BecomeTutorModal() {
                   type="checkbox"
                   checked={modes.includes(mode)}
                   onChange={() => toggleMode(mode)}
-                  className="h-4 w-4 accent-[#6366F1]"
+                  className="h-4 w-4 accent-primary-500"
                 />
                 {t(mode === 'online' ? 'modeOnline' : 'modeInPerson')}
               </label>
