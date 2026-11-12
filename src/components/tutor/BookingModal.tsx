@@ -69,14 +69,14 @@ export function BookingModal({ tutor, onClose }: BookingModalProps) {
 
             <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200/60">
               <img
-                src={tutor.avatarUrl}
+                src={tutor.avatar}
                 alt={tutor.name}
                 className="h-12 w-12 rounded-full object-cover border border-slate-200"
               />
               <div>
                 <h3 className="font-bold text-slate-900 text-sm">{tutor.name}</h3>
                 <p className="text-xs text-[#6366F1] font-extrabold">
-                  {tutor.hourlyRate} د.م / ساعة
+                  {tutor.pricePerHour} د.م / ساعة
                 </p>
               </div>
             </div>
