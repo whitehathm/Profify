@@ -53,13 +53,49 @@ export function Header() {
         <button
           type="button"
           onClick={() => navigate('discover')}
-          className="flex items-center gap-2.5 rounded-full transition duration-200 active:scale-[0.98]"
+          className="flex items-center gap-2 rounded-full transition duration-200 active:scale-[0.98]"
           aria-label="Profify"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-500 text-white shadow-sm">
-            <GraduationCap className="h-5 w-5" aria-hidden="true" />
+          <svg
+            width="34"
+            height="34"
+            viewBox="0 0 40 40"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              d="M11 8V32"
+              stroke="#121117"
+              strokeWidth="4.2"
+              strokeLinecap="round"
+            />
+            <path
+              d="M11 8H22.5C27.7467 8 32 12.0294 32 17C32 21.9706 27.7467 26 22.5 26H15.5L11 29.5V8Z"
+              fill="#FF5A79"
+            />
+            <line
+              x1="17.5"
+              y1="15"
+              x2="25.5"
+              y2="15"
+              stroke="#FFFFFF"
+              strokeWidth="2.6"
+              strokeLinecap="round"
+            />
+            <line
+              x1="17.5"
+              y1="19.5"
+              x2="22.5"
+              y2="19.5"
+              stroke="#FFFFFF"
+              strokeWidth="2.6"
+              strokeLinecap="round"
+            />
+          </svg>
+          <span className="text-xl font-extrabold tracking-tight text-[#121117]">
+            Prof<span className="text-[#FF5A79]">i</span>fy
           </span>
-          <span className="text-lg font-bold tracking-tight text-primary-950">Profify</span>
         </button>
 
         <div className="flex items-center gap-1 sm:gap-2">
