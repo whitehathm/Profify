@@ -72,7 +72,7 @@ export function Header() {
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-            <circle cx="22.5" cy="28" r="2.4" fill="#121117" />
+            <circle cx="22.5" cy="28" r="2.4" fill="#FFFFFF" />
           </svg>
 
           <span className="text-xl font-extrabold tracking-tight text-[#121117]">
