@@ -166,6 +166,11 @@ export const strings = {
     fr: 'Touchez le cœur sur la carte d’un professeur pour le retrouver ici.',
     en: 'Tap the heart on any tutor card to keep them here.',
   },
+  savedTutorsHeading: {
+    ar: 'الأساتذة المحفوظون مؤخراً',
+    fr: 'Professeurs récemment enregistrés',
+    en: 'Recently saved tutors',
+  },
   browseTutors: { ar: 'تصفح الأساتذة', fr: 'Parcourir les professeurs', en: 'Browse tutors' },
   bookingsEmptyTitle: { ar: 'لا توجد حجوزات بعد', fr: 'Aucune réservation', en: 'No bookings yet' },
   bookingsEmptyText: {
@@ -189,6 +194,13 @@ export const strings = {
   hiddenLabel: { ar: 'مخفي من البحث', fr: 'Masqué de la recherche', en: 'Hidden from search' },
   statEarnings: { ar: 'أرباح الشهر', fr: 'Revenus du mois', en: 'Earnings this month' },
   statSessions: { ar: 'حصص مدرّسة', fr: 'Séances données', en: 'Sessions taught' },
+  confirmedSessions: { ar: 'حصص مؤكدة', fr: 'Séances confirmées', en: 'Confirmed sessions' },
+  activeStudents: { ar: 'الطلاب النشطون', fr: 'Élèves actifs', en: 'Active students' },
+  newRequestsCount: {
+    ar: '{count} طلب جديد',
+    fr: '{count} nouvelle(s) demande(s)',
+    en: '{count} new request(s)',
+  },
   statViews: { ar: 'مشاهدات الملف', fr: 'Vues du profil', en: 'Profile views' },
   statRating: { ar: 'التقييم', fr: 'Note', en: 'Rating' },
   earningsTitle: { ar: 'الأرباح', fr: 'Revenus', en: 'Earnings' },
