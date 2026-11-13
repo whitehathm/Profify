@@ -9,7 +9,7 @@ import { StudentDashboard } from '@/components/dashboard/StudentDashboard';
 import { TutorDashboard } from '@/components/dashboard/TutorDashboard';
 import { HowItWorksPage } from '@/pages/HowItWorksPage';
 import { ContactPage } from '@/pages/ContactPage';
-import { WhyTeachSection } from '@/components/tutor/WhyTeachSection';
+import { TutorOnboardingWizard } from '@/components/tutor/TutorOnboardingWizard';
 
 const DIRECTION = { ar: 'rtl', fr: 'ltr', en: 'ltr' } as const;
 
@@ -32,7 +32,7 @@ export default function App() {
         ) : view === 'how-it-works' ? (
           <HowItWorksPage />
         ) : view === 'become-tutor' ? (
-          <WhyTeachSection />
+          <TutorOnboardingWizard />
         ) : view === 'contact' ? (
           <ContactPage />
         ) : (

@@ -4,6 +4,8 @@ export type Role = 'visitor' | 'student' | 'tutor';
 export type TeachingMode = 'online' | 'in_person';
 export type BookingStatus = 'pending' | 'accepted' | 'declined' | 'cancelled';
 export type SortOption = 'rating' | 'price_asc' | 'price_desc';
+export type SpecialtyId = 'conversation' | 'exam_prep' | 'business' | 'beginners' | 'academic';
+export type ExperienceBand = '1-2' | '3-5' | '5+';
 
 export interface Subject {
   id: string;
@@ -28,17 +30,22 @@ export interface Review {
 export interface Tutor {
   id: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
   headline: Localized;
   avatar: string;
   cityId: string;
   subjectIds: string[];
+  specialties?: SpecialtyId[];
   pricePerHour: number;
+  offersFreeTrial?: boolean;
   rating: number;
   reviewCount: number;
   verified: boolean;
   published: boolean;
   modes: TeachingMode[];
   experienceYears: number;
+  experienceBand?: ExperienceBand;
   bio: Localized;
   qualifications: Localized[];
   availableDays: number[];

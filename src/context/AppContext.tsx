@@ -60,6 +60,7 @@ interface AppContextValue {
   tutors: Tutor[];
   addTutor: (profile: Omit<Tutor, 'id'>) => Promise<Tutor | null>;
   updateTutor: (id: string, patch: Partial<Tutor>) => void;
+  removeTutor: (id: string) => Promise<void>;
   savedIds: string[];
   toggleSaved: (id: string) => void;
   bookings: Booking[];
@@ -211,6 +212,23 @@ function readInitialLang(): Lang {
   return 'ar';
 }
 
+const LOCAL_USER_STORAGE_KEY = 'profify:local-user:v1';
+
+function readLocalUser(): CurrentUser | null {
+  if (typeof window === 'undefined' || supabase) return null;
+  try {
+    const raw = window.localStorage.getItem(LOCAL_USER_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<CurrentUser>;
+    if (typeof parsed.id === 'string' && typeof parsed.name === 'string' && typeof parsed.email === 'string') {
+      return { id: parsed.id, name: parsed.name, email: parsed.email };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(readInitialLang);
   const setLang = useCallback((next: Lang) => {
@@ -228,7 +246,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setRole('visitor');
     window.scrollTo({ top: 0 });
   }, []);
-  const [user, setUser] = useState<CurrentUser | null>(null);
+  const [user, setUser] = useState<CurrentUser | null>(readLocalUser);
 
   useEffect(() => {
     if (!supabase) return;
@@ -380,15 +398,46 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const loginWithPassword = useCallback(async (email: string, password: string): Promise<AuthResult> => {
-    if (!supabase) return { error: 'authUnavailable' };
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    const cleanEmail = email.trim().toLowerCase();
+    if (!supabase) {
+      const existing = readLocalUser();
+      const localUser: CurrentUser = existing && existing.email === cleanEmail
+        ? existing
+        : {
+            id: makeId('user'),
+            name: cleanEmail.split('@')[0] || 'Tutor',
+            email: cleanEmail,
+          };
+      try {
+        window.localStorage.setItem(LOCAL_USER_STORAGE_KEY, JSON.stringify(localUser));
+      } catch {
+        // Ignore storage errors cleanly.
+      }
+      setUser(localUser);
+      return {};
+    }
+    const { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
     return error ? { error: getAuthErrorKey(error) } : {};
   }, []);
 
   const registerWithPassword = useCallback(async (name: string, email: string, password: string): Promise<AuthResult> => {
-    if (!supabase) return { error: 'authUnavailable' };
+    const cleanEmail = email.trim().toLowerCase();
+    if (!supabase) {
+      const localUser: CurrentUser = {
+        id: makeId('user'),
+        name: name.trim() || cleanEmail.split('@')[0] || 'Tutor',
+        email: cleanEmail,
+      };
+      try {
+        window.localStorage.setItem(LOCAL_USER_STORAGE_KEY, JSON.stringify(localUser));
+      } catch {
+        // Ignore storage errors cleanly.
+      }
+      setUser(localUser);
+      return {};
+    }
     const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
+      email: cleanEmail,
       password,
       options: {
         data: { full_name: name.trim() },
@@ -401,6 +450,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async (): Promise<boolean> => {
     if (!supabase) {
+      try {
+        window.localStorage.removeItem(LOCAL_USER_STORAGE_KEY);
+      } catch {
+        // Ignore storage errors cleanly.
+      }
       setUser(null);
       return true;
     }
@@ -450,6 +504,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     void save();
   }, [tutors, user, mutateTutors, notify, t]);
+
+  const removeTutor = useCallback(async (id: string) => {
+    const existing = tutors.find((tutor) => tutor.id === id);
+    if (supabase && user && existing?.ownerId === user.id) {
+      try {
+        await supabase.from('tutors').update({ published: false }).eq('id', id);
+      } catch {
+        // Fall through to local removal.
+      }
+    }
+    await mutateTutors((current = []) => current.filter((tutor) => tutor.id !== id), { revalidate: false });
+  }, [tutors, user, mutateTutors]);
 
   const toggleSaved = useCallback((id: string) => {
     setSavedIds((previous) => (previous.includes(id) ? previous.filter((item) => item !== id) : [...previous, id]));
@@ -528,6 +594,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       tutors,
       addTutor,
       updateTutor,
+      removeTutor,
       savedIds,
       toggleSaved,
       bookings,
@@ -541,6 +608,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }),
     [
       lang,
+      setLang,
       t,
       role,
       view,
@@ -552,6 +620,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       tutors,
       addTutor,
       updateTutor,
+      removeTutor,
       savedIds,
       toggleSaved,
       bookings,

@@ -1,12 +1,13 @@
-import type { ReactNode } from 'react';
-import type { TutorFilters } from '@/types';
+import { Star } from 'lucide-react';
 import { CITIES, SUBJECTS } from '@/data/catalog';
+import type { TutorFilters } from '@/types';
 import { useApp } from '@/context/AppContext';
-import { Chip } from '@/components/ui/Chip';
 import { Button } from '@/components/ui/Button';
+import { Chip } from '@/components/ui/Chip';
+import { inputClass } from '@/components/ui/Field';
 import { Segmented } from '@/components/ui/Segmented';
-import { PRICE_MAX, PRICE_MIN, RATING_OPTIONS } from '@/lib/tutorFilters';
 import { formatNumber } from '@/lib/format';
+import { PRICE_MAX, PRICE_MIN, RATING_OPTIONS, countActiveFilters } from '@/lib/tutorFilters';
 
 interface FilterPanelProps {
   filters: TutorFilters;
@@ -14,81 +15,54 @@ interface FilterPanelProps {
   onReset: () => void;
 }
 
-function FilterGroup({ title, trailing, children }: { title: string; trailing?: ReactNode; children: ReactNode }) {
-  return (
-    <div>
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <h3 className="text-sm font-bold text-primary-950">{title}</h3>
-        {trailing}
-      </div>
-      {children}
-    </div>
-  );
-}
-
 export function FilterPanel({ filters, onChange, onReset }: FilterPanelProps) {
-  const { t, lang } = useApp();
+  const { lang, t } = useApp();
+  const activeCount = countActiveFilters(filters);
 
   return (
-    <div className="space-y-7">
-      <FilterGroup title={t('filterSubject')}>
-        <div className="flex flex-wrap gap-2">
-          <Chip active={filters.subjectId === null} onClick={() => onChange({ subjectId: null })}>
-            {t('allSubjects')}
-          </Chip>
+    <div className="space-y-6">
+      <div>
+        <label htmlFor="filter-subject" className="mb-2 block text-sm font-semibold text-primary-950">
+          {t('filterSubject')}
+        </label>
+        <select
+          id="filter-subject"
+          className={inputClass}
+          value={filters.subjectId ?? ''}
+          onChange={(event) => onChange({ subjectId: event.target.value || null })}
+        >
+          <option value="">{t('allSubjects')}</option>
           {SUBJECTS.map((subject) => (
-            <Chip key={subject.id} active={filters.subjectId === subject.id} onClick={() => onChange({ subjectId: subject.id })}>
+            <option key={subject.id} value={subject.id}>
               {subject.label[lang]}
-            </Chip>
+            </option>
           ))}
-        </div>
-      </FilterGroup>
+        </select>
+      </div>
 
-      <FilterGroup title={t('filterCity')}>
-        <div className="flex flex-wrap gap-2">
-          <Chip active={filters.cityId === null} onClick={() => onChange({ cityId: null })}>
-            {t('allCities')}
-          </Chip>
+      <div>
+        <label htmlFor="filter-city" className="mb-2 block text-sm font-semibold text-primary-950">
+          {t('filterCity')}
+        </label>
+        <select
+          id="filter-city"
+          className={inputClass}
+          value={filters.cityId ?? ''}
+          onChange={(event) => onChange({ cityId: event.target.value || null })}
+        >
+          <option value="">{t('allCities')}</option>
           {CITIES.map((city) => (
-            <Chip key={city.id} active={filters.cityId === city.id} onClick={() => onChange({ cityId: city.id })}>
+            <option key={city.id} value={city.id}>
               {city.label[lang]}
-            </Chip>
+            </option>
           ))}
-        </div>
-      </FilterGroup>
+        </select>
+      </div>
 
-      <FilterGroup
-        title={t('filterPrice')}
-        trailing={<span className="text-sm font-semibold text-primary-800">{t('upTo', { price: formatNumber(filters.maxPrice) })}</span>}
-      >
-        <input
-          type="range"
-          min={PRICE_MIN}
-          max={PRICE_MAX}
-          step={10}
-          value={filters.maxPrice}
-          aria-label={t('filterPrice')}
-          onChange={(event) => onChange({ maxPrice: Number(event.target.value) })}
-          className="w-full accent-primary-700"
-        />
-        <div className="mt-1 flex justify-between text-xs text-slate-500">
-          <span>{PRICE_MIN}</span>
-          <span>{PRICE_MAX}</span>
-        </div>
-      </FilterGroup>
-
-      <FilterGroup title={t('filterRating')}>
-        <div className="flex flex-wrap gap-2">
-          {RATING_OPTIONS.map((rating) => (
-            <Chip key={rating} active={filters.minRating === rating} onClick={() => onChange({ minRating: rating })}>
-              {rating === 0 ? t('anyRating') : `${rating.toFixed(1)}+`}
-            </Chip>
-          ))}
-        </div>
-      </FilterGroup>
-
-      <FilterGroup title={t('filterMode')}>
+      <div>
+        <span className="mb-2 block text-sm font-semibold text-primary-950">{t('filterMode')}</span>
         <Segmented
+          compact
           label={t('filterMode')}
           value={filters.mode}
           onChange={(mode) => onChange({ mode })}
@@ -98,11 +72,60 @@ export function FilterPanel({ filters, onChange, onReset }: FilterPanelProps) {
             { value: 'in_person', label: t('modeInPerson') },
           ]}
         />
-      </FilterGroup>
+      </div>
 
-      <Button variant="ghost" block onClick={onReset}>
-        {t('resetFilters')}
-      </Button>
+      <div>
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <label htmlFor="filter-price" className="text-sm font-semibold text-primary-950">
+            {t('filterPrice')}
+          </label>
+          <span className="text-xs font-semibold text-primary-700">
+            {t('upTo', { price: formatNumber(filters.maxPrice) })}
+          </span>
+        </div>
+        <input
+          id="filter-price"
+          type="range"
+          min={PRICE_MIN}
+          max={PRICE_MAX}
+          step={10}
+          value={filters.maxPrice}
+          onChange={(event) => onChange({ maxPrice: Number(event.target.value) })}
+          className="h-2 w-full cursor-pointer accent-primary-500"
+        />
+        <div className="mt-1 flex justify-between text-xs text-slate-500">
+          <span>{formatNumber(PRICE_MIN)} {t('currency')}</span>
+          <span>{formatNumber(PRICE_MAX)} {t('currency')}</span>
+        </div>
+      </div>
+
+      <div>
+        <span className="mb-2 block text-sm font-semibold text-primary-950">{t('filterRating')}</span>
+        <div className="flex flex-wrap gap-2">
+          {RATING_OPTIONS.map((rating) => (
+            <Chip
+              key={rating}
+              active={filters.minRating === rating}
+              onClick={() => onChange({ minRating: rating })}
+            >
+              {rating === 0 ? (
+                t('anyRating')
+              ) : (
+                <span className="inline-flex items-center gap-1">
+                  <Star className="h-3.5 w-3.5 fill-warning-500 text-warning-500" aria-hidden="true" />
+                  <span>{rating}+</span>
+                </span>
+              )}
+            </Chip>
+          ))}
+        </div>
+      </div>
+
+      {activeCount > 0 && (
+        <Button variant="ghost" block onClick={onReset}>
+          {t('resetFilters')}
+        </Button>
+      )}
     </div>
   );
 }

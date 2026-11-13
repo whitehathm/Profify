@@ -28,7 +28,7 @@ function LessonIllustration() {
 }
 
 export function HowItWorksPage() {
-  const { t, navigate, openModal } = useApp();
+  const { t, navigate } = useApp();
 
   return (
     <div className="bg-white">
@@ -55,7 +55,7 @@ export function HowItWorksPage() {
           <Button size="lg" className="rounded-full bg-primary-950 px-8 text-white hover:bg-primary-900" onClick={() => navigate('discover')}>
             {t('navFindTutoring')}
           </Button>
-          <Button variant="outline" size="lg" className="rounded-full px-8" onClick={() => openModal({ type: 'become-tutor' })}>
+          <Button variant="outline" size="lg" className="rounded-full px-8" onClick={() => navigate('become-tutor')}>
             {t('becomeTutorCta')}
           </Button>
         </div>

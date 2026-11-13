@@ -1,29 +1,47 @@
-import { MapPin, ShieldCheck, Star } from 'lucide-react';
+import { Globe, ShieldCheck, Star } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { formatNumber } from '@/lib/format';
 
 export function TrustMetricsBar() {
-  const { t } = useApp();
+  const { tutors, t } = useApp();
+  const verifiedCount = tutors.filter((tutor) => tutor.published && tutor.verified).length;
+  const ratedTutors = tutors.filter((tutor) => tutor.published && tutor.reviewCount > 0);
+  const averageRating = ratedTutors.length
+    ? (ratedTutors.reduce((sum, tutor) => sum + tutor.rating, 0) / ratedTutors.length).toFixed(1)
+    : '4.9';
+
+  const items = [
+    {
+      icon: ShieldCheck,
+      value: formatNumber(verifiedCount),
+      label: t('trustVerified'),
+    },
+    {
+      icon: Star,
+      value: `${averageRating} / 5`,
+      label: t('trustRating'),
+    },
+    {
+      icon: Globe,
+      value: formatNumber(6),
+      label: t('trustModes'),
+    },
+  ];
 
   return (
-    <section aria-label={t('trustVerified')} className="border-b border-secondary-200 bg-white">
-      <div className="mx-auto grid max-w-7xl grid-cols-3 divide-x divide-secondary-200 px-2 sm:px-6">
-        <div className="flex flex-col items-center gap-1.5 px-2 py-3 text-center sm:flex-row sm:gap-3 sm:py-4 sm:px-6 sm:text-start">
-          <ShieldCheck className="h-5 w-5 shrink-0 text-success-700" aria-hidden="true" />
-          <p className="text-xs font-semibold leading-tight text-primary-950 sm:text-sm">{t('trustVerified')}</p>
-        </div>
-
-        <div className="flex flex-col items-center gap-1 px-2 py-3 text-center sm:flex-row sm:gap-3 sm:py-4 sm:px-6 sm:text-start">
-          <p className="flex items-center gap-1 text-sm font-extrabold text-primary-950 sm:text-base">
-            4.9
-            <Star className="h-4 w-4 fill-warning-500 text-warning-500" aria-hidden="true" />
-          </p>
-          <p className="text-xs font-medium leading-tight text-slate-600 sm:text-sm">{t('trustRating')}</p>
-        </div>
-
-        <div className="flex flex-col items-center gap-1.5 px-2 py-3 text-center sm:flex-row sm:gap-3 sm:py-4 sm:px-6 sm:text-start">
-          <MapPin className="h-5 w-5 shrink-0 text-primary-700" aria-hidden="true" />
-          <p className="text-xs font-semibold leading-tight text-primary-950 sm:text-sm">{t('trustModes')}</p>
-        </div>
+    <section className="border-b border-secondary-200 bg-secondary-50/70">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-3 px-4 py-4 sm:grid-cols-3 sm:gap-6 sm:px-6">
+        {items.map(({ icon: Icon, value, label }) => (
+          <div key={label} className="flex items-center gap-3 rounded-2xl bg-white/80 px-4 py-2.5 ring-1 ring-secondary-200/80">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700">
+              <Icon className="h-4 w-4" aria-hidden="true" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-primary-950">{value}</p>
+              <p className="truncate text-xs text-slate-600">{label}</p>
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );
