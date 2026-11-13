@@ -14,7 +14,7 @@ const BENEFITS: {
 ];
 
 export function WhyTeachSection() {
-  const { t, openModal } = useApp();
+  const { t, openTutorWizard } = useApp();
 
   return (
     <section className="bg-[#FFF0F3]">
@@ -40,10 +40,10 @@ export function WhyTeachSection() {
         <div className="mt-14 flex justify-center">
           <Button
             size="lg"
-            className="rounded-full bg-primary-950 px-8 text-white shadow-sm hover:bg-primary-900"
-            onClick={() => openModal({ type: 'become-tutor' })}
+            className="min-h-[48px] rounded-full bg-primary-950 px-8 text-white shadow-sm hover:bg-primary-900"
+            onClick={openTutorWizard}
           >
-            {t('becomeTutorCta')}
+            {t('whyTeachCta')}
           </Button>
         </div>
       </div>

@@ -8,10 +8,12 @@ import {
   Copy,
   Globe,
   Lock,
+  MailCheck,
   MessageCircle,
   Minus,
   Monitor,
   Plus,
+  RefreshCw,
   Share2,
   ShieldCheck,
   Sparkles,
@@ -20,7 +22,12 @@ import {
   Users,
 } from 'lucide-react';
 import { CITIES, EXPERIENCE_BANDS, SPECIALTIES, SUBJECTS, cityLabel, subjectLabel } from '@/data/catalog';
-import { useApp } from '@/context/AppContext';
+import {
+  clearPendingTutorOnboarding,
+  getPendingTutorOnboardingEmail,
+  markPendingTutorOnboarding,
+  useApp,
+} from '@/context/AppContext';
 import { Button } from '@/components/ui/Button';
 import { Field, TextInput, inputClass } from '@/components/ui/Field';
 import { Segmented } from '@/components/ui/Segmented';
@@ -33,6 +40,7 @@ import {
   saveTutorExtras,
   submitTutorApplication,
 } from '@/lib/tutorExtras';
+import { supabase } from '@/lib/supabase';
 import type { ExperienceBand, SpecialtyId, TeachingMode, Tutor } from '@/types';
 
 const TOTAL_STEPS = 6;
@@ -46,19 +54,26 @@ export function TutorOnboardingWizard() {
     user,
     loginWithPassword,
     registerWithPassword,
+    resendVerificationEmail,
+    closeTutorWizard,
     addTutor,
     setRole,
     notify,
   } = useApp();
 
-  // Auth Gate state
+  // Auth Gate & Email Verification state
   const [authMode, setAuthMode] = useState<'register' | 'login'>('register');
   const [authName, setAuthName] = useState('');
-  const [authEmail, setAuthEmail] = useState('');
+  const [authEmail, setAuthEmail] = useState(() => getPendingTutorOnboardingEmail());
   const [authPassword, setAuthPassword] = useState('');
   const [authErrors, setAuthErrors] = useState<{ name?: string; email?: string; password?: string }>({});
   const [authFormError, setAuthFormError] = useState<string | null>(null);
   const [authSubmitting, setAuthSubmitting] = useState(false);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string>(() =>
+    getPendingTutorOnboardingEmail(),
+  );
+  const [resendingEmail, setResendingEmail] = useState(false);
+  const [resendFeedback, setResendFeedback] = useState<string | null>(null);
 
   // Wizard step & form state
   const [step, setStep] = useState(1);
@@ -90,23 +105,31 @@ export function TutorOnboardingWizard() {
     if (authPassword.length < 6) nextErrors.password = t('errPassword');
     setAuthErrors(nextErrors);
     setAuthFormError(null);
+    setResendFeedback(null);
     if (Object.keys(nextErrors).length > 0) return;
 
     setAuthSubmitting(true);
     try {
-      const displayName = authName.trim() || authEmail.trim().split('@')[0];
+      const cleanEmail = authEmail.trim().toLowerCase();
+      const displayName = authName.trim() || cleanEmail.split('@')[0];
       const result = authMode === 'login'
-        ? await loginWithPassword(authEmail, authPassword)
-        : await registerWithPassword(displayName, authEmail, authPassword);
+        ? await loginWithPassword(cleanEmail, authPassword)
+        : await registerWithPassword(displayName, cleanEmail, authPassword);
 
       if (result.error) {
-        setAuthFormError(t(result.error));
+        setAuthFormError(result.errorMessage || t(result.error));
         return;
       }
-      if (result.needsEmailConfirmation) {
-        notify(t('authCheckEmail'));
+
+      if (result.needsEmailVerification || result.needsEmailConfirmation) {
+        const targetEmail = result.email || cleanEmail;
+        markPendingTutorOnboarding(targetEmail);
+        setPendingVerificationEmail(targetEmail);
         return;
       }
+
+      clearPendingTutorOnboarding();
+      setPendingVerificationEmail('');
       if (authName.trim() && !firstName) {
         const [first, ...rest] = authName.trim().split(/\s+/);
         setFirstName(first);
@@ -118,6 +141,46 @@ export function TutorOnboardingWizard() {
     } finally {
       setAuthSubmitting(false);
     }
+  };
+
+  const handleResendVerification = async () => {
+    const targetEmail = pendingVerificationEmail || user?.email || authEmail.trim().toLowerCase();
+    if (!targetEmail) return;
+    setResendingEmail(true);
+    setAuthFormError(null);
+    setResendFeedback(null);
+    try {
+      const result = await resendVerificationEmail(targetEmail);
+      if (result.error) {
+        setAuthFormError(result.errorMessage || t(result.error));
+      } else {
+        setResendFeedback(t('verificationResentToast'));
+        notify(t('verificationResentToast'));
+      }
+    } finally {
+      setResendingEmail(false);
+    }
+  };
+
+  const handleCheckVerifiedAndLogin = async () => {
+    setAuthFormError(null);
+    setResendFeedback(null);
+    if (supabase) {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (data.session?.user?.email_confirmed_at) {
+          clearPendingTutorOnboarding();
+          setPendingVerificationEmail('');
+          return;
+        }
+      } catch {
+        // Fall through to login form.
+      }
+    }
+    const savedEmail = pendingVerificationEmail || user?.email || authEmail;
+    if (savedEmail) setAuthEmail(savedEmail);
+    setPendingVerificationEmail('');
+    setAuthMode('login');
   };
 
   const toggleSpecialty = (id: SpecialtyId) => {
@@ -287,11 +350,80 @@ export function TutorOnboardingWizard() {
     }
   };
 
-  // 1. Auth Gate Screen
-  if (!user) {
+  // 1A. Email Verification Pending Screen
+  const activePendingEmail = pendingVerificationEmail || (user && !user.emailConfirmed ? user.email : '');
+  if ((!user || !user.emailConfirmed) && activePendingEmail) {
     return (
       <section className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-primary-50/70 via-white to-white px-4 py-10 sm:px-6 sm:py-16">
         <div className="mx-auto max-w-md">
+          <div className="rounded-3xl border border-secondary-200 bg-white p-6 text-center shadow-card sm:p-8">
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-50 text-primary-600 ring-1 ring-primary-100">
+              <MailCheck className="h-7 w-7" aria-hidden="true" />
+            </div>
+
+            <h1 className="text-2xl font-extrabold tracking-tight text-primary-950">
+              {t('verifyEmailTitle')}
+            </h1>
+            <p className="mt-3 text-sm leading-relaxed text-slate-600">
+              {t('verifyEmailBody', { email: activePendingEmail })}
+            </p>
+
+            {resendFeedback && (
+              <p role="status" className="mt-4 rounded-xl bg-success-50 px-3.5 py-2.5 text-xs font-semibold text-success-700">
+                {resendFeedback}
+              </p>
+            )}
+
+            {authFormError && (
+              <p role="alert" className="mt-4 rounded-xl bg-error-50 px-3.5 py-2.5 text-xs font-semibold text-error-700">
+                {authFormError}
+              </p>
+            )}
+
+            <div className="mt-6 space-y-3">
+              <Button
+                type="button"
+                variant="primary"
+                size="lg"
+                block
+                className="min-h-[44px] bg-primary-950 text-white"
+                onClick={handleCheckVerifiedAndLogin}
+              >
+                {t('verifiedLoginBtn')}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                block
+                disabled={resendingEmail}
+                className="min-h-[44px]"
+                icon={<RefreshCw className={`h-4 w-4 ${resendingEmail ? 'animate-spin' : ''}`} aria-hidden="true" />}
+                onClick={handleResendVerification}
+              >
+                {t('resendVerificationBtn')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // 1B. Auth Gate Screen
+  if (!user || !user.emailConfirmed) {
+    return (
+      <section className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-primary-50/70 via-white to-white px-4 py-10 sm:px-6 sm:py-16">
+        <div className="mx-auto max-w-md">
+          <button
+            type="button"
+            onClick={closeTutorWizard}
+            className="mb-4 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-slate-600 transition hover:text-primary-950"
+          >
+            <ArrowLeft className="h-4 w-4 rtl:rotate-180" aria-hidden="true" />
+            <span>{t('backToBenefits')}</span>
+          </button>
+
           <div className="mb-6 text-center">
             <p className="text-xs font-semibold tracking-wide text-primary-700">{t('authGateBadge')}</p>
             <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-primary-950 sm:text-3xl">

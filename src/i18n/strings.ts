@@ -681,6 +681,47 @@ export const strings = {
   toastDocUploaded: { ar: 'تم رفع الوثيقة بنجاح', fr: 'Document envoyé avec succès', en: 'Document uploaded' },
   toastPhotoSaved: { ar: 'تم تحديث الصورة الشخصية', fr: 'Photo de profil mise à jour', en: 'Profile photo updated' },
   toastNotifSaved: { ar: 'تم حفظ إعدادات الإشعارات', fr: 'Préférences enregistrées', en: 'Notification preferences saved' },
+  whyTeachCta: { ar: 'أصبح أستاذاً', fr: 'Devenir professeur', en: 'Become a Tutor' },
+  authEmailAlreadyRegistered: {
+    ar: 'هذا البريد الإلكتروني مسجل بالفعل.',
+    fr: 'Cette adresse e-mail est déjà utilisée.',
+    en: 'Email already registered.',
+  },
+  verifyEmailTitle: {
+    ar: 'تحقق من بريدك الإلكتروني',
+    fr: 'Vérifiez votre adresse e-mail',
+    en: 'Verify your email address',
+  },
+  verifyEmailBody: {
+    ar: 'أرسلنا رابط التحقق إلى {email}. يرجى تفقد بريدك الوارد (ومجلد الرسائل غير المرغوب فيها Spam) والنقر على الرابط لتأكيد بريدك الإلكتروني قبل المتابعة.',
+    fr: 'Nous avons envoyé un lien de vérification à {email}. Veuillez consulter votre boîte de réception (et vos spams) et cliquer sur le lien pour vérifier votre e-mail avant de continuer.',
+    en: 'We sent a verification link to {email}. Please check your inbox (and Spam folder) and click the link to verify your email before continuing.',
+  },
+  resendVerificationBtn: {
+    ar: 'إعادة إرسال رابط التحقق',
+    fr: 'Renvoyer l’e-mail de vérification',
+    en: 'Resend verification email',
+  },
+  verificationResentToast: {
+    ar: 'تمت إعادة إرسال رابط التحقق إلى بريدك الإلكتروني.',
+    fr: 'E-mail de vérification renvoyé.',
+    en: 'Verification email resent. Please check your inbox.',
+  },
+  verifiedLoginBtn: {
+    ar: 'لقد تحققت من بريدي / تسجيل الدخول',
+    fr: 'J’ai vérifié mon e-mail / Se connecter',
+    en: 'I verified my email / Log in',
+  },
+  backToBenefits: {
+    ar: 'العودة',
+    fr: 'Retour',
+    en: 'Back',
+  },
+  emailNotVerifiedYet: {
+    ar: 'لم يتم تأكيد بريدك الإلكتروني بعد. انقر على الرابط في بريدك ثم حاول مجدداً.',
+    fr: 'Votre e-mail n’est pas encore confirmé. Cliquez sur le lien reçu puis réessayez.',
+    en: 'Your email is not verified yet. Please click the verification link in your inbox, then try again.',
+  },
 } satisfies Record<string, Localized>;
 
 export type StringKey = keyof typeof strings;

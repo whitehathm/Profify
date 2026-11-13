@@ -42,10 +42,10 @@ export function AuthModal({ initialMode }: { initialMode: AuthMode }) {
         : await registerWithPassword(name, email, password);
 
       if (result.error) {
-        setFormError(t(result.error));
+        setFormError(result.errorMessage || t(result.error));
         return;
       }
-      if (result.needsEmailConfirmation) {
+      if (result.needsEmailVerification || result.needsEmailConfirmation) {
         notify(t('authCheckEmail'));
         closeModal();
         return;

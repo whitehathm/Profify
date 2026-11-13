@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import useSWR from 'swr';
 import type { AuthError, Session } from '@supabase/supabase-js';
 import type { Booking, BookingStatus, Lang, Localized, ModalState, Review, Role, TeachingMode, Toast, Tutor } from '@/types';
-import { supabase, supabaseAuthRedirectUrl } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { TUTORS } from '@/data/tutors';
 import { SEED_BOOKINGS } from '@/data/bookings';
 import { CURRENT_STUDENT_ID } from '@/data/catalog';
@@ -14,12 +14,14 @@ export interface CurrentUser {
   id: string;
   name: string;
   email: string;
+  emailConfirmed: boolean;
 }
 
 export type AuthErrorKey =
   | 'authUnavailable'
   | 'authInvalidCredentials'
   | 'authEmailNotConfirmed'
+  | 'authEmailAlreadyRegistered'
   | 'authWeakPassword'
   | 'authInvalidEmail'
   | 'authEmailNotAuthorized'
@@ -30,8 +32,12 @@ export type AuthErrorKey =
 export type View = 'discover' | 'how-it-works' | 'become-tutor' | 'contact';
 
 export interface AuthResult {
+  ok?: boolean;
   error?: AuthErrorKey;
+  errorMessage?: string;
   needsEmailConfirmation?: boolean;
+  needsEmailVerification?: boolean;
+  email?: string;
 }
 
 export interface NewBooking {
@@ -53,9 +59,13 @@ interface AppContextValue {
   setRole: (role: Role) => void;
   view: View;
   navigate: (view: View) => void;
+  tutorWizardOpen: boolean;
+  openTutorWizard: () => void;
+  closeTutorWizard: () => void;
   user: CurrentUser | null;
   loginWithPassword: (email: string, password: string) => Promise<AuthResult>;
   registerWithPassword: (name: string, email: string, password: string) => Promise<AuthResult>;
+  resendVerificationEmail: (email: string) => Promise<AuthResult>;
   signOut: () => Promise<boolean>;
   tutors: Tutor[];
   addTutor: (profile: Omit<Tutor, 'id'>) => Promise<Tutor | null>;
@@ -121,17 +131,23 @@ function toCurrentUser(session: Session | null): CurrentUser | null {
   if (!authUser) return null;
 
   const metadataName = authUser.user_metadata.full_name ?? authUser.user_metadata.name;
+  const emailConfirmed = Boolean(authUser.email_confirmed_at ?? (authUser as { confirmed_at?: string | null }).confirmed_at);
   return {
     id: authUser.id,
     name: typeof metadataName === 'string' && metadataName.trim()
       ? metadataName.trim()
       : authUser.email?.split('@')[0] ?? 'Profify user',
     email: authUser.email ?? '',
+    emailConfirmed,
   };
 }
 
 function getAuthErrorKey(error: AuthError): AuthErrorKey {
+  const msg = (error.message ?? '').toLowerCase();
   if (error.code === 'email_not_confirmed') return 'authEmailNotConfirmed';
+  if (error.code === 'user_already_exists' || msg.includes('already registered') || msg.includes('already exists')) {
+    return 'authEmailAlreadyRegistered';
+  }
   if (error.code === 'weak_password') return 'authWeakPassword';
   if (error.code === 'email_address_invalid') return 'authInvalidEmail';
   if (error.code === 'email_address_not_authorized') return 'authEmailNotAuthorized';
@@ -213,6 +229,7 @@ function readInitialLang(): Lang {
 }
 
 const LOCAL_USER_STORAGE_KEY = 'profify:local-user:v1';
+const PENDING_TUTOR_ONBOARDING_KEY = 'profify:pending-tutor-onboarding:v1';
 
 function readLocalUser(): CurrentUser | null {
   if (typeof window === 'undefined' || supabase) return null;
@@ -221,11 +238,43 @@ function readLocalUser(): CurrentUser | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<CurrentUser>;
     if (typeof parsed.id === 'string' && typeof parsed.name === 'string' && typeof parsed.email === 'string') {
-      return { id: parsed.id, name: parsed.name, email: parsed.email };
+      return {
+        id: parsed.id,
+        name: parsed.name,
+        email: parsed.email,
+        emailConfirmed: parsed.emailConfirmed ?? true,
+      };
     }
     return null;
   } catch {
     return null;
+  }
+}
+
+export function markPendingTutorOnboarding(email: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(PENDING_TUTOR_ONBOARDING_KEY, email);
+  } catch {
+    // Ignore storage errors cleanly.
+  }
+}
+
+export function getPendingTutorOnboardingEmail(): string {
+  if (typeof window === 'undefined') return '';
+  try {
+    return window.localStorage.getItem(PENDING_TUTOR_ONBOARDING_KEY) ?? '';
+  } catch {
+    return '';
+  }
+}
+
+export function clearPendingTutorOnboarding(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(PENDING_TUTOR_ONBOARDING_KEY);
+  } catch {
+    // Ignore storage errors cleanly.
   }
 }
 
@@ -241,23 +290,50 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
   const [role, setRole] = useState<Role>('visitor');
   const [view, setView] = useState<View>('discover');
+  const [tutorWizardOpen, setTutorWizardOpen] = useState(false);
+
   const navigate = useCallback((next: View) => {
     setView(next);
     setRole('visitor');
+    setTutorWizardOpen(false);
     window.scrollTo({ top: 0 });
   }, []);
+
+  const openTutorWizard = useCallback(() => {
+    setView('become-tutor');
+    setRole('visitor');
+    setTutorWizardOpen(true);
+    window.scrollTo({ top: 0 });
+  }, []);
+
+  const closeTutorWizard = useCallback(() => {
+    setTutorWizardOpen(false);
+  }, []);
+
   const [user, setUser] = useState<CurrentUser | null>(readLocalUser);
 
   useEffect(() => {
     if (!supabase) return;
 
     let active = true;
+
+    const syncSession = (session: Session | null) => {
+      const nextUser = toCurrentUser(session);
+      setUser(nextUser);
+      if (nextUser?.emailConfirmed && getPendingTutorOnboardingEmail()) {
+        clearPendingTutorOnboarding();
+        setView('become-tutor');
+        setRole('visitor');
+        setTutorWizardOpen(true);
+      }
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(toCurrentUser(session));
+      if (active) syncSession(session);
     });
 
     void supabase.auth.getSession().then(({ data: { session } }) => {
-      if (active) setUser(toCurrentUser(session));
+      if (active) syncSession(session);
     });
 
     return () => {
@@ -402,11 +478,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!supabase) {
       const existing = readLocalUser();
       const localUser: CurrentUser = existing && existing.email === cleanEmail
-        ? existing
+        ? { ...existing, emailConfirmed: true }
         : {
             id: makeId('user'),
             name: cleanEmail.split('@')[0] || 'Tutor',
             email: cleanEmail,
+            emailConfirmed: true,
           };
       try {
         window.localStorage.setItem(LOCAL_USER_STORAGE_KEY, JSON.stringify(localUser));
@@ -414,10 +491,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         // Ignore storage errors cleanly.
       }
       setUser(localUser);
-      return {};
+      return { ok: true, email: cleanEmail };
     }
-    const { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
-    return error ? { error: getAuthErrorKey(error) } : {};
+    const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+    if (error) {
+      return { ok: false, error: getAuthErrorKey(error), errorMessage: error.message };
+    }
+    const nextUser = toCurrentUser(data.session);
+    if (nextUser) setUser(nextUser);
+    return { ok: true, email: cleanEmail };
   }, []);
 
   const registerWithPassword = useCallback(async (name: string, email: string, password: string): Promise<AuthResult> => {
@@ -427,6 +509,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         id: makeId('user'),
         name: name.trim() || cleanEmail.split('@')[0] || 'Tutor',
         email: cleanEmail,
+        emailConfirmed: true,
       };
       try {
         window.localStorage.setItem(LOCAL_USER_STORAGE_KEY, JSON.stringify(localUser));
@@ -434,18 +517,58 @@ export function AppProvider({ children }: { children: ReactNode }) {
         // Ignore storage errors cleanly.
       }
       setUser(localUser);
-      return {};
+      return { ok: true, needsEmailVerification: false, needsEmailConfirmation: false, email: cleanEmail };
     }
+
     const { data, error } = await supabase.auth.signUp({
       email: cleanEmail,
       password,
       options: {
         data: { full_name: name.trim() },
-        emailRedirectTo: supabaseAuthRedirectUrl || window.location.origin,
+        emailRedirectTo: window.location.origin,
       },
     });
-    if (error) return { error: getAuthErrorKey(error) };
-    return { needsEmailConfirmation: !data.session };
+
+    if (error) {
+      return { ok: false, error: getAuthErrorKey(error), errorMessage: error.message };
+    }
+
+    // Supabase returns an empty identities array when the email is already registered & confirmed.
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      return {
+        ok: false,
+        error: 'authEmailAlreadyRegistered',
+        errorMessage: 'Email already registered',
+      };
+    }
+
+    const needsVerification = !data.session;
+    return {
+      ok: true,
+      needsEmailVerification: needsVerification,
+      needsEmailConfirmation: needsVerification,
+      email: data.user?.email ?? cleanEmail,
+    };
+  }, []);
+
+  const resendVerificationEmail = useCallback(async (email: string): Promise<AuthResult> => {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!supabase) return { ok: true, email: cleanEmail };
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: cleanEmail,
+        options: {
+          emailRedirectTo: window.location.origin,
+        },
+      });
+      if (error) {
+        return { ok: false, error: getAuthErrorKey(error), errorMessage: error.message };
+      }
+      return { ok: true, email: cleanEmail };
+    } catch {
+      return { ok: false, error: 'authUnexpected' };
+    }
   }, []);
 
   const signOut = useCallback(async (): Promise<boolean> => {
@@ -587,9 +710,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setRole,
       view,
       navigate,
+      tutorWizardOpen,
+      openTutorWizard,
+      closeTutorWizard,
       user,
       loginWithPassword,
       registerWithPassword,
+      resendVerificationEmail,
       signOut,
       tutors,
       addTutor,
@@ -613,9 +740,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       role,
       view,
       navigate,
+      tutorWizardOpen,
+      openTutorWizard,
+      closeTutorWizard,
       user,
       loginWithPassword,
       registerWithPassword,
+      resendVerificationEmail,
       signOut,
       tutors,
       addTutor,
