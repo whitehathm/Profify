@@ -28,7 +28,8 @@ function LessonIllustration() {
 }
 
 export function HowItWorksPage() {
-  const { t, navigate } = useApp();
+  const { t, navigate, role, hasTutorProfile } = useApp();
+  const isTutorAccount = hasTutorProfile || role === 'tutor';
 
   return (
     <div className="bg-white">
@@ -55,9 +56,11 @@ export function HowItWorksPage() {
           <Button size="lg" className="rounded-full bg-primary-950 px-8 text-white hover:bg-primary-900" onClick={() => navigate('discover')}>
             {t('navFindTutoring')}
           </Button>
-          <Button variant="outline" size="lg" className="rounded-full px-8" onClick={() => navigate('become-tutor')}>
-            {t('becomeTutorCta')}
-          </Button>
+          {!isTutorAccount && (
+            <Button variant="outline" size="lg" className="rounded-full px-8" onClick={() => navigate('become-tutor')}>
+              {t('becomeTutorCta')}
+            </Button>
+          )}
         </div>
       </section>
     </div>

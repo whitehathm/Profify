@@ -68,6 +68,8 @@ interface AppContextValue {
   resendVerificationEmail: (email: string) => Promise<AuthResult>;
   signOut: () => Promise<boolean>;
   tutors: Tutor[];
+  currentTutor: Tutor | null;
+  hasTutorProfile: boolean;
   addTutor: (profile: Omit<Tutor, 'id'>) => Promise<Tutor | null>;
   updateTutor: (id: string, patch: Partial<Tutor>) => void;
   removeTutor: (id: string) => Promise<void>;
@@ -299,29 +301,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return;
     }
   }, []);
-  const [role, setRole] = useState<Role>('visitor');
+  const [role, setRoleState] = useState<Role>('visitor');
   const [view, setView] = useState<View>('discover');
   const [tutorWizardOpen, setTutorWizardOpen] = useState(false);
-
-  const navigate = useCallback((next: View) => {
-    setView(next);
-    setRole('visitor');
-    setTutorWizardOpen(false);
-    window.scrollTo({ top: 0 });
-  }, []);
-
-  const openTutorWizard = useCallback(() => {
-    setView('become-tutor');
-    setRole('visitor');
-    setTutorWizardOpen(true);
-    window.scrollTo({ top: 0 });
-  }, []);
-
-  const closeTutorWizard = useCallback(() => {
-    setTutorWizardOpen(false);
-  }, []);
-
   const [user, setUser] = useState<CurrentUser | null>(readLocalUser);
+
+  const setRole = useCallback((next: Role) => {
+    setRoleState(next);
+    if (next === 'tutor') {
+      setTutorWizardOpen(false);
+    }
+    window.scrollTo({ top: 0 });
+  }, []);
 
   useEffect(() => {
     if (!supabase) return;
@@ -334,7 +325,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (nextUser?.emailConfirmed && getPendingTutorOnboardingEmail()) {
         clearPendingTutorOnboarding();
         setView('become-tutor');
-        setRole('visitor');
+        setRoleState('visitor');
         setTutorWizardOpen(true);
       }
     };
@@ -391,6 +382,48 @@ export function AppProvider({ children }: { children: ReactNode }) {
     fallbackData: tutorFallback,
     revalidateOnFocus: true,
   });
+
+  const currentTutor = useMemo(
+    () => (user ? tutors.find((tutor) => tutor.ownerId === user.id) ?? null : null),
+    [tutors, user],
+  );
+  const hasTutorProfile = Boolean(currentTutor);
+
+  useEffect(() => {
+    if (hasTutorProfile && role === 'student') {
+      setRoleState('tutor');
+    }
+  }, [hasTutorProfile, role]);
+
+  const navigate = useCallback((next: View) => {
+    if (next === 'become-tutor' && (hasTutorProfile || role === 'tutor')) {
+      setRoleState('tutor');
+      setTutorWizardOpen(false);
+      window.scrollTo({ top: 0 });
+      return;
+    }
+    setView(next);
+    setRoleState('visitor');
+    setTutorWizardOpen(false);
+    window.scrollTo({ top: 0 });
+  }, [hasTutorProfile, role]);
+
+  const openTutorWizard = useCallback(() => {
+    if (hasTutorProfile || role === 'tutor') {
+      setRoleState('tutor');
+      setTutorWizardOpen(false);
+      window.scrollTo({ top: 0 });
+      return;
+    }
+    setView('become-tutor');
+    setRoleState('visitor');
+    setTutorWizardOpen(true);
+    window.scrollTo({ top: 0 });
+  }, [hasTutorProfile, role]);
+
+  const closeTutorWizard = useCallback(() => {
+    setTutorWizardOpen(false);
+  }, []);
 
   const {
     data: bookings = bookingFallback,
@@ -589,12 +622,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
         // Ignore storage errors cleanly.
       }
       setUser(null);
+      setRoleState('visitor');
+      setTutorWizardOpen(false);
       return true;
     }
     try {
       const { error } = await supabase.auth.signOut();
       if (error) return false;
       setUser(null);
+      setRoleState('visitor');
+      setTutorWizardOpen(false);
       return true;
     } catch {
       return false;
@@ -737,7 +774,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return true;
   }, [user, mutateBookings, notify, t]);
 
-  const openModal = useCallback((next: Exclude<ModalState, null>) => setModal(next), []);
+  const openModal = useCallback((next: Exclude<ModalState, null>) => {
+    if (next.type === 'become-tutor' && (hasTutorProfile || role === 'tutor')) {
+      setRoleState('tutor');
+      setTutorWizardOpen(false);
+      return;
+    }
+    setModal(next);
+  }, [hasTutorProfile, role]);
   const closeModal = useCallback(() => setModal(null), []);
 
   const value = useMemo<AppContextValue>(
@@ -758,6 +802,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       resendVerificationEmail,
       signOut,
       tutors,
+      currentTutor,
+      hasTutorProfile,
       addTutor,
       updateTutor,
       removeTutor,
@@ -777,6 +823,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setLang,
       t,
       role,
+      setRole,
       view,
       navigate,
       tutorWizardOpen,
@@ -788,6 +835,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       resendVerificationEmail,
       signOut,
       tutors,
+      currentTutor,
+      hasTutorProfile,
       addTutor,
       updateTutor,
       removeTutor,

@@ -10,7 +10,12 @@ const FOOTER_LINKS: { view: View; labelKey: StringKey }[] = [
 ];
 
 export function Footer() {
-  const { t, navigate } = useApp();
+  const { t, navigate, role, hasTutorProfile } = useApp();
+  const isTutorAccount = hasTutorProfile || role === 'tutor';
+  const visibleLinks = isTutorAccount
+    ? FOOTER_LINKS.filter((item) => item.view !== 'become-tutor')
+    : FOOTER_LINKS;
+
   return (
     <footer className="border-t border-primary-900 bg-primary-950 text-white">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-9 text-center sm:flex-row sm:px-6 sm:text-start">
@@ -42,7 +47,7 @@ export function Footer() {
         </button>
 
         <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-          {FOOTER_LINKS.map(({ view, labelKey }) => (
+          {visibleLinks.map(({ view, labelKey }) => (
             <button
               key={view}
               type="button"

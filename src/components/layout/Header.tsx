@@ -1,6 +1,7 @@
 import { BookOpen, Check, Compass, CircleUser, GraduationCap, Globe, ListOrdered, LogOut, Mail, Menu, Search } from 'lucide-react';
 import type { Lang } from '@/types';
 import { useApp } from '@/context/AppContext';
+import { Avatar } from '@/components/ui/Avatar';
 import { PopoverMenu, type PopoverMenuItem } from '@/components/ui/PopoverMenu';
 
 const LANG_OPTIONS: { value: Lang; code: string; label: string }[] = [
@@ -15,7 +16,23 @@ const ICON_TRIGGER_CLASS =
 const ICON_PROPS = { className: 'h-4 w-4', strokeWidth: 1.75, 'aria-hidden': true } as const;
 
 export function Header() {
-  const { t, lang, setLang, role, setRole, view, navigate, user, signOut, notify, openModal } = useApp();
+  const {
+    t,
+    lang,
+    setLang,
+    role,
+    setRole,
+    view,
+    navigate,
+    user,
+    currentTutor,
+    hasTutorProfile,
+    signOut,
+    notify,
+    openModal,
+  } = useApp();
+
+  const isTutorAccount = hasTutorProfile || role === 'tutor';
 
   const languageItems: PopoverMenuItem[] = LANG_OPTIONS.map((option) => ({
     key: option.value,
@@ -25,25 +42,60 @@ export function Header() {
     onSelect: () => setLang(option.value),
   }));
 
-  const accountItems: PopoverMenuItem[] = [
-    { key: 'visitor', label: t('browseTutors'), icon: <Compass {...ICON_PROPS} />, active: role === 'visitor', onSelect: () => setRole('visitor') },
-    { key: 'student', label: t('roleStudent'), icon: <GraduationCap {...ICON_PROPS} />, active: role === 'student', onSelect: () => setRole('student') },
-    { key: 'tutor', label: t('roleTutor'), icon: <BookOpen {...ICON_PROPS} />, active: role === 'tutor', onSelect: () => setRole('tutor') },
-    {
-      key: 'logout',
-      label: t('logout'),
-      icon: <LogOut {...ICON_PROPS} />,
-      onSelect: async () => {
-        const signedOut = await signOut();
-        notify(t(signedOut ? 'toastLoggedOut' : 'authUnexpected'));
-      },
+  const logoutItem: PopoverMenuItem = {
+    key: 'logout',
+    label: t('logout'),
+    icon: <LogOut {...ICON_PROPS} />,
+    onSelect: async () => {
+      const signedOut = await signOut();
+      notify(t(signedOut ? 'toastLoggedOut' : 'authUnexpected'));
     },
-  ];
+  };
+
+  const accountItems: PopoverMenuItem[] = isTutorAccount
+    ? [
+        {
+          key: 'tutor-dashboard',
+          label: t('tutorTitle'),
+          icon: <BookOpen {...ICON_PROPS} />,
+          active: role === 'tutor',
+          onSelect: () => setRole('tutor'),
+        },
+        logoutItem,
+      ]
+    : [
+        { key: 'visitor', label: t('browseTutors'), icon: <Compass {...ICON_PROPS} />, active: role === 'visitor', onSelect: () => setRole('visitor') },
+        { key: 'student', label: t('roleStudent'), icon: <GraduationCap {...ICON_PROPS} />, active: role === 'student', onSelect: () => setRole('student') },
+        { key: 'tutor', label: t('roleTutor'), icon: <BookOpen {...ICON_PROPS} />, active: false, onSelect: () => setRole('tutor') },
+        logoutItem,
+      ];
+
+  const tutorHeader = isTutorAccount && user ? (
+    <div className="flex items-center gap-2.5">
+      <Avatar
+        src={currentTutor?.avatar}
+        name={currentTutor?.firstName || currentTutor?.name || user.name}
+        size="sm"
+      />
+      <div className="min-w-0 flex-1 text-start">
+        <p className="truncate text-sm font-bold text-primary-950">
+          {currentTutor?.firstName || currentTutor?.name || user.name}
+        </p>
+        <p className="truncate text-xs text-slate-500">
+          {currentTutor
+            ? (currentTutor.verified ? t('verifiedLiveLabel') : t('underQualityReviewLabel'))
+            : t('tutorAccountBadge')}
+        </p>
+      </div>
+    </div>
+  ) : undefined;
 
   const navItems: PopoverMenuItem[] = [
     { key: 'discover', label: t('navFindTutoring'), icon: <Search {...ICON_PROPS} />, active: view === 'discover' && role === 'visitor', onSelect: () => navigate('discover') },
     { key: 'how-it-works', label: t('navHowItWorks'), icon: <ListOrdered {...ICON_PROPS} />, active: view === 'how-it-works', onSelect: () => navigate('how-it-works') },
-    { key: 'become-tutor', label: t('navBecomeTutor'), icon: <GraduationCap {...ICON_PROPS} />, active: view === 'become-tutor', onSelect: () => navigate('become-tutor') },
+    ...(!isTutorAccount
+      ? [{ key: 'become-tutor', label: t('navBecomeTutor'), icon: <GraduationCap {...ICON_PROPS} />, active: view === 'become-tutor', onSelect: () => navigate('become-tutor') }]
+      : []),
     { key: 'contact', label: t('navContact'), icon: <Mail {...ICON_PROPS} />, active: view === 'contact', onSelect: () => navigate('contact') },
   ];
 
@@ -93,6 +145,7 @@ export function Header() {
               ariaLabel={t('dashboardLabel')}
               triggerClassName={ICON_TRIGGER_CLASS}
               trigger={<CircleUser className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />}
+              header={tutorHeader}
               items={accountItems}
             />
           ) : (

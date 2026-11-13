@@ -12,10 +12,11 @@ interface PopoverMenuProps {
   ariaLabel: string;
   triggerClassName: string;
   trigger: ReactNode;
+  header?: ReactNode;
   items: PopoverMenuItem[];
 }
 
-export function PopoverMenu({ ariaLabel, triggerClassName, trigger, items }: PopoverMenuProps) {
+export function PopoverMenu({ ariaLabel, triggerClassName, trigger, header, items }: PopoverMenuProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -50,8 +51,13 @@ export function PopoverMenu({ ariaLabel, triggerClassName, trigger, items }: Pop
       {open && (
         <div
           role="menu"
-          className="absolute end-0 top-full z-50 mt-2 min-w-[12rem] origin-top-end animate-scale-in overflow-hidden rounded-2xl border border-secondary-200 bg-white p-1.5 shadow-card-hover"
+          className="absolute end-0 top-full z-50 mt-2 min-w-[14rem] origin-top-end animate-scale-in overflow-hidden rounded-2xl border border-secondary-200 bg-white p-1.5 shadow-card-hover"
         >
+          {header && (
+            <div className="mb-1 border-b border-secondary-200 px-3 py-2.5">
+              {header}
+            </div>
+          )}
           {items.map((item) => (
             <button
               key={item.key}

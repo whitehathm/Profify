@@ -727,6 +727,56 @@ export const strings = {
     fr: 'Choisissez vos années d’expérience',
     en: 'Please select your years of experience',
   },
+  pendingListingLinkTitle: {
+    ar: 'رابط ملفك العام قيد التفعيل',
+    fr: 'Lien public en attente d’approbation',
+    en: 'Public listing link pending approval',
+  },
+  pendingListingLinkBody: {
+    ar: 'ملفك قيد مراجعة الجودة حالياً. بمجرد الموافقة عليه، سيظهر رابط إعلانك العام هنا لتتمكن من مشاركته مع الطلبة.',
+    fr: 'Votre profil est en cours de contrôle qualité. Une fois approuvé, votre lien d’annonce public apparaîtra ici pour le partager avec vos élèves.',
+    en: 'Your profile is under quality review. Once approved, your public listing link will appear here so you can share it with students.',
+  },
+  publicListingLinkTitle: {
+    ar: 'رابط ملفك العام',
+    fr: 'Votre lien d’annonce public',
+    en: 'Your public listing link',
+  },
+  publicListingLinkHint: {
+    ar: 'ملفك موثوق ومنشور. شارك هذا الرابط مباشرة مع الطلبة لحجز الحصص.',
+    fr: 'Votre profil est vérifié et en ligne. Partagez ce lien directement avec vos élèves.',
+    en: 'Your profile is verified and live. Share this link directly with students.',
+  },
+  verifiedLiveLabel: {
+    ar: 'موثوق ومفعّل',
+    fr: 'Vérifié et en ligne',
+    en: 'Verified & Live',
+  },
+  underQualityReviewLabel: {
+    ar: 'قيد مراجعة الجودة',
+    fr: 'En cours de contrôle qualité',
+    en: 'Under Quality Review',
+  },
+  sectionPublicListing: {
+    ar: 'إعدادات الملف العام',
+    fr: 'Paramètres de l’annonce publique',
+    en: 'Public Listing Settings',
+  },
+  sectionAccountVerification: {
+    ar: 'الحساب والتحقق (خاص)',
+    fr: 'Compte et vérification (privé)',
+    en: 'Account & Verification (Private)',
+  },
+  actionNeededStatus: {
+    ar: 'إجراء مطلوب',
+    fr: 'Action requise',
+    en: 'Action Needed',
+  },
+  tutorAccountBadge: {
+    ar: 'حساب أستاذ',
+    fr: 'Compte professeur',
+    en: 'Tutor account',
+  },
 } satisfies Record<string, Localized>;
 
 export type StringKey = keyof typeof strings;

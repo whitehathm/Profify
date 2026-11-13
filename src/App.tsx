@@ -15,7 +15,7 @@ import { TutorOnboardingWizard } from '@/components/tutor/TutorOnboardingWizard'
 const DIRECTION = { ar: 'rtl', fr: 'ltr', en: 'ltr' } as const;
 
 export default function App() {
-  const { lang, role, view, tutorWizardOpen } = useApp();
+  const { lang, role, view, tutorWizardOpen, hasTutorProfile } = useApp();
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -33,7 +33,13 @@ export default function App() {
         ) : view === 'how-it-works' ? (
           <HowItWorksPage />
         ) : view === 'become-tutor' ? (
-          tutorWizardOpen ? <TutorOnboardingWizard /> : <WhyTeachSection />
+          tutorWizardOpen ? (
+            <TutorOnboardingWizard />
+          ) : hasTutorProfile ? (
+            <TutorDashboard />
+          ) : (
+            <WhyTeachSection />
+          )
         ) : view === 'contact' ? (
           <ContactPage />
         ) : (

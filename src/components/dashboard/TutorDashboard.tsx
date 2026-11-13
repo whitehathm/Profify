@@ -7,12 +7,16 @@ import {
   CalendarCheck,
   Camera,
   Check,
+  ChevronRight,
   Clock,
+  Copy,
   CreditCard,
   FileText,
+  Lock,
+  MessageCircle,
   Pencil,
+  Share2,
   ShieldCheck,
-  Star,
   Trash2,
   Upload,
   UserCog,
@@ -61,6 +65,16 @@ type ActiveModal =
   | 'delete'
   | null;
 
+interface SettingsRowItem {
+  key: Exclude<ActiveModal, null>;
+  title: string;
+  desc: string;
+  icon: typeof UserCog;
+  statusLabel?: string;
+  statusTone?: 'uploaded' | 'needed';
+  onOpen: () => void;
+}
+
 const WEEK_DAYS = [1, 2, 3, 4, 5, 6, 0];
 
 export function TutorDashboard() {
@@ -86,6 +100,7 @@ export function TutorDashboard() {
   const [tab, setTab] = useState<DashboardTab>('overview');
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
   const [extras, setExtras] = useState<TutorExtras>(() => getTutorExtras(activeTutorId));
+  const [copiedLink, setCopiedLink] = useState(false);
 
   // Sync extras when tutor changes
   const mergedExtras = useMemo(
@@ -136,6 +151,21 @@ export function TutorDashboard() {
   const offersFreeTrial = mergedExtras.offersFreeTrial ?? tutor?.offersFreeTrial ?? true;
   const diplomas = mergedExtras.diplomas ?? [];
   const cinDocs = mergedExtras.cinDocs ?? [];
+  const isVerified = Boolean(tutor?.verified);
+
+  const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://profify.ma'}/?tutor=${encodeURIComponent(activeTutorId)}`;
+  const whatsappHref = `https://wa.me/?text=${encodeURIComponent(`${t('shareWhatsappMsg')} ${shareUrl}`)}`;
+
+  const handleCopyShareLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopiedLink(true);
+      notify(t('linkCopied'));
+      window.setTimeout(() => setCopiedLink(false), 2500);
+    } catch {
+      notify(t('linkCopied'));
+    }
+  };
 
   const openGeneralModal = () => {
     if (!tutor) return;
@@ -310,21 +340,12 @@ export function TutorDashboard() {
   const toggleItem = <T,>(list: T[], item: T): T[] =>
     list.includes(item) ? list.filter((value) => value !== item) : [...list, item];
 
-  const actionCards: {
-    key: Exclude<ActiveModal, null>;
-    title: string;
-    desc: string;
-    status?: string;
-    icon: typeof UserCog;
-    tone: 'default' | 'success' | 'danger';
-    onOpen: () => void;
-  }[] = [
+  const publicSettingsRows: SettingsRowItem[] = [
     {
       key: 'general',
       title: t('actionGeneralInfo'),
       desc: t('actionGeneralInfoDesc'),
       icon: UserCog,
-      tone: 'default',
       onOpen: openGeneralModal,
     },
     {
@@ -332,7 +353,6 @@ export function TutorDashboard() {
       title: t('actionTeachingPricing'),
       desc: t('actionTeachingPricingDesc'),
       icon: BookOpen,
-      tone: 'default',
       onOpen: openTeachingModal,
     },
     {
@@ -340,16 +360,18 @@ export function TutorDashboard() {
       title: t('actionProfilePhoto'),
       desc: t('actionProfilePhotoDesc'),
       icon: Camera,
-      tone: 'default',
       onOpen: openPhotoModal,
     },
+  ];
+
+  const privateSettingsRows: SettingsRowItem[] = [
     {
       key: 'diplomas',
       title: t('actionDiplomas'),
       desc: t('actionDiplomasDesc'),
-      status: diplomas.length > 0 ? t('docUploadedStatus') : t('docRequiredStatus'),
       icon: Award,
-      tone: diplomas.length > 0 ? 'success' : 'default',
+      statusLabel: diplomas.length > 0 ? t('docUploadedStatus') : t('actionNeededStatus'),
+      statusTone: diplomas.length > 0 ? 'uploaded' : 'needed',
       onOpen: () => {
         setModalError(null);
         setActiveModal('diplomas');
@@ -359,9 +381,9 @@ export function TutorDashboard() {
       key: 'cin',
       title: t('actionCin'),
       desc: t('actionCinDesc'),
-      status: cinDocs.length > 0 ? t('docUploadedStatus') : t('docRequiredStatus'),
       icon: CreditCard,
-      tone: cinDocs.length > 0 ? 'success' : 'default',
+      statusLabel: cinDocs.length > 0 ? t('docUploadedStatus') : t('actionNeededStatus'),
+      statusTone: cinDocs.length > 0 ? 'uploaded' : 'needed',
       onOpen: () => {
         setModalError(null);
         setActiveModal('cin');
@@ -372,25 +394,66 @@ export function TutorDashboard() {
       title: t('actionNotifications'),
       desc: t('actionNotificationsDesc'),
       icon: Bell,
-      tone: 'default',
       onOpen: openNotifModal,
-    },
-    {
-      key: 'delete',
-      title: t('actionDeleteAccount'),
-      desc: t('actionDeleteAccountDesc'),
-      icon: Trash2,
-      tone: 'danger',
-      onOpen: () => setActiveModal('delete'),
     },
   ];
 
+  const renderSettingsGroup = (heading: string, rows: SettingsRowItem[]) => (
+    <div className="space-y-2.5">
+      <h2 className="px-1 text-xs font-bold tracking-wide text-slate-500">{heading}</h2>
+      <div className="divide-y divide-secondary-200 overflow-hidden rounded-2xl border border-secondary-200 bg-white">
+        {rows.map(({ key, title, desc, icon: Icon, statusLabel, statusTone, onOpen }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={onOpen}
+            className="flex min-h-[72px] w-full items-center justify-between gap-3 px-4 py-3.5 text-start transition-colors hover:bg-secondary-50/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500 sm:px-5"
+          >
+            <div className="flex min-w-0 flex-1 items-center gap-3.5">
+              <span
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                  statusTone === 'uploaded'
+                    ? 'bg-emerald-50 text-emerald-700'
+                    : statusTone === 'needed'
+                      ? 'bg-amber-50 text-amber-700'
+                      : 'bg-secondary-100 text-primary-950'
+                }`}
+              >
+                <Icon className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold text-primary-950 sm:text-base">{title}</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-slate-500 sm:text-sm">{desc}</p>
+              </div>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-2.5">
+              {statusLabel && (
+                <span
+                  className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${
+                    statusTone === 'uploaded'
+                      ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/80'
+                      : 'bg-amber-50 text-amber-800 ring-1 ring-amber-200/80'
+                  }`}
+                >
+                  {statusTone === 'uploaded' && <Check className="h-3 w-3" strokeWidth={2} aria-hidden="true" />}
+                  {statusLabel}
+                </span>
+              )}
+              <ChevronRight className="h-5 w-5 text-slate-400 rtl:rotate-180" strokeWidth={1.5} aria-hidden="true" />
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
-      {/* Header + Mobile-first Two-Tab Switcher */}
-      <div className="flex flex-col gap-4 border-b border-secondary-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6 sm:py-9">
+      {/* Header + Clean Two-Tab Switcher */}
+      <div className="flex flex-col gap-4 border-b border-secondary-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-primary-950">{t('tutorTitle')}</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight text-primary-950 sm:text-3xl">{t('tutorTitle')}</h1>
           <p className="mt-1 text-sm text-slate-600">{t('tutorSubtitle')}</p>
         </div>
 
@@ -415,7 +478,7 @@ export function TutorDashboard() {
                 onClick={() => setTab(item.id)}
                 className={`min-h-[44px] whitespace-nowrap rounded-xl px-4 py-2 text-sm font-bold transition ${
                   active
-                    ? 'bg-primary-950 text-white shadow-sm'
+                    ? 'bg-[#121117] text-white shadow-sm'
                     : 'text-slate-600 hover:text-primary-950'
                 }`}
               >
@@ -430,7 +493,7 @@ export function TutorDashboard() {
       {tab === 'overview' && (
         <div className="space-y-6 animate-fade-in">
           {/* Top Profile Summary Card */}
-          <section className="rounded-3xl border border-secondary-200 bg-white p-5 shadow-card sm:p-6">
+          <section className="rounded-2xl border border-secondary-200 bg-white p-5 sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-4">
                 <div className="relative shrink-0">
@@ -439,25 +502,22 @@ export function TutorDashboard() {
                     type="button"
                     onClick={openPhotoModal}
                     aria-label={t('actionProfilePhoto')}
-                    className="absolute -bottom-1 -end-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-primary-500 text-white shadow-sm transition hover:bg-primary-600"
+                    className="absolute -bottom-1 -end-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#FF5A79] text-white shadow-sm transition hover:bg-primary-600"
                   >
-                    <Camera className="h-3.5 w-3.5" aria-hidden="true" />
+                    <Camera className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden="true" />
                   </button>
                 </div>
 
                 <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="truncate text-xl font-extrabold text-primary-950">{firstNameDisplay}</h2>
-                    {primarySubjectLabel && (
-                      <span className="inline-flex items-center rounded-full bg-primary-50 px-2.5 py-0.5 text-xs font-bold text-primary-700 ring-1 ring-primary-200">
-                        {primarySubjectLabel}
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-1 text-sm text-slate-600 tabular-nums">
-                    {formatNumber(tutor?.pricePerHour ?? 120)} {t('currency')} {t('perHour')}
-                    {' · '}
-                    {cityLabel(tutor?.cityId ?? 'casablanca', lang)}
+                  <h2 className="text-xl font-extrabold tracking-tight text-primary-950">{firstNameDisplay}</h2>
+                  <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-slate-600 tabular-nums">
+                    {primarySubjectLabel && <span className="font-semibold text-primary-950">{primarySubjectLabel}</span>}
+                    {primarySubjectLabel && <span aria-hidden="true" className="text-slate-300">·</span>}
+                    <span>
+                      {formatNumber(tutor?.pricePerHour ?? 120)} {t('currency')} {t('perHour')}
+                    </span>
+                    <span aria-hidden="true" className="text-slate-300">·</span>
+                    <span>{cityLabel(tutor?.cityId ?? 'casablanca', lang)}</span>
                   </p>
                 </div>
               </div>
@@ -465,65 +525,127 @@ export function TutorDashboard() {
               <Button
                 variant="outline"
                 size="md"
-                icon={<Pencil className="h-4 w-4" aria-hidden="true" />}
+                icon={<Pencil className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />}
                 onClick={openGeneralModal}
-                className="min-h-[44px] w-full sm:w-auto"
+                className="min-h-[44px] w-full shrink-0 sm:w-auto"
               >
                 {t('editProfileBtn')}
               </Button>
             </div>
           </section>
 
-          {/* 3 Horizontal Status Cards */}
-          <section aria-label={t('verificationStatusLabel')} className="grid grid-cols-3 gap-2.5 sm:gap-4">
-            <div className="rounded-2xl border border-secondary-200 bg-white p-3.5 shadow-card sm:p-5">
-              <div className="flex items-center gap-2">
-                <span
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${
-                    tutor?.verified ? 'bg-success-50 text-success-700' : 'bg-warning-50 text-warning-700'
-                  }`}
-                >
-                  {tutor?.verified ? (
-                    <BadgeCheck className="h-4 w-4" aria-hidden="true" />
-                  ) : (
-                    <Clock className="h-4 w-4" aria-hidden="true" />
-                  )}
-                </span>
-                <p className="truncate text-xs font-medium text-slate-500">{t('verificationStatusLabel')}</p>
-              </div>
-              <p className="mt-2.5 text-xs font-bold text-primary-950 sm:text-sm">
-                {tutor?.verified ? t('verifiedStatusLabel') : t('pendingQualityCheck')}
-              </p>
+          {/* Full-Width Horizontal Status Banner (zero truncation) */}
+          <section
+            aria-label={t('verificationStatusLabel')}
+            className="overflow-hidden rounded-2xl border border-secondary-200 bg-white"
+          >
+            <div
+              className={`flex flex-wrap items-center justify-between gap-3 border-b px-5 py-3.5 ${
+                isVerified
+                  ? 'border-emerald-200/80 bg-emerald-50/60'
+                  : 'border-amber-200/80 bg-amber-50/60'
+              }`}
+            >
+              <span
+                className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold ${
+                  isVerified
+                    ? 'bg-emerald-100 text-emerald-900'
+                    : 'bg-amber-100 text-amber-900'
+                }`}
+              >
+                {isVerified ? (
+                  <BadgeCheck className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                ) : (
+                  <Clock className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                )}
+                <span>{isVerified ? t('verifiedLiveLabel') : t('underQualityReviewLabel')}</span>
+              </span>
+              <span className="text-xs font-medium text-slate-600">
+                {isVerified ? t('visibleLabel') : t('hiddenLabel')}
+              </span>
             </div>
 
-            <div className="rounded-2xl border border-secondary-200 bg-white p-3.5 shadow-card sm:p-5">
-              <div className="flex items-center gap-2">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-600">
-                  <Star className="h-4 w-4 fill-current" aria-hidden="true" />
+            <div className="grid grid-cols-1 divide-y divide-secondary-200 sm:grid-cols-3 sm:divide-x sm:divide-y-0 rtl:sm:divide-x-reverse">
+              <div className="flex items-center justify-between gap-3 px-5 py-4 sm:flex-col sm:items-start sm:justify-center sm:gap-1">
+                <span className="text-xs font-medium text-slate-500">{t('verificationStatusLabel')}</span>
+                <span className="text-sm font-bold text-primary-950">
+                  {isVerified ? t('verifiedLiveLabel') : t('underQualityReviewLabel')}
                 </span>
-                <p className="truncate text-xs font-medium text-slate-500">{t('reviewsCountLabel')}</p>
               </div>
-              <p className="mt-2.5 text-lg font-extrabold tabular-nums text-primary-950 sm:text-xl">
-                {formatNumber(tutor?.reviewCount ?? 0)}
-              </p>
-            </div>
 
-            <div className="rounded-2xl border border-secondary-200 bg-white p-3.5 shadow-card sm:p-5">
-              <div className="flex items-center gap-2">
-                <span
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${
-                    offersFreeTrial ? 'bg-success-50 text-success-700' : 'bg-secondary-100 text-slate-500'
-                  }`}
-                >
-                  <CalendarCheck className="h-4 w-4" aria-hidden="true" />
+              <div className="flex items-center justify-between gap-3 px-5 py-4 sm:flex-col sm:items-start sm:justify-center sm:gap-1">
+                <span className="text-xs font-medium text-slate-500">{t('reviewsCountLabel')}</span>
+                <span className="text-base font-extrabold tabular-nums text-primary-950 sm:text-lg">
+                  {formatNumber(tutor?.reviewCount ?? 0)}
                 </span>
-                <p className="truncate text-xs font-medium text-slate-500">{t('freeTrialStatusLabel')}</p>
               </div>
-              <p className="mt-2.5 text-xs font-bold text-primary-950 sm:text-sm">
-                {offersFreeTrial ? t('freeTrialActive') : t('freeTrialInactive')}
-              </p>
+
+              <div className="flex items-center justify-between gap-3 px-5 py-4 sm:flex-col sm:items-start sm:justify-center sm:gap-1">
+                <span className="text-xs font-medium text-slate-500">{t('freeTrialStatusLabel')}</span>
+                <span className="text-sm font-bold tabular-nums text-primary-950">
+                  {offersFreeTrial ? t('freeTrialActive') : t('freeTrialInactive')}
+                </span>
+              </div>
             </div>
           </section>
+
+          {/* Public Listing Link Card — Hidden Until Verified */}
+          {isVerified ? (
+            <section className="rounded-2xl border border-secondary-200 bg-white p-5 sm:p-6">
+              <div className="flex items-start gap-3.5">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-600">
+                  <Share2 className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-base font-bold text-primary-950">{t('publicListingLinkTitle')}</h2>
+                  <p className="mt-1 text-sm leading-relaxed text-slate-600">{t('publicListingLinkHint')}</p>
+                </div>
+              </div>
+
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-secondary-200 bg-secondary-50/60 px-3 py-2">
+                  <input
+                    type="text"
+                    readOnly
+                    dir="ltr"
+                    value={shareUrl}
+                    aria-label={t('copyShareLink')}
+                    className="min-w-0 flex-1 bg-transparent text-xs text-slate-700 focus:outline-none"
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCopyShareLink}
+                    icon={copiedLink ? <Check className="h-4 w-4" strokeWidth={1.5} /> : <Copy className="h-4 w-4" strokeWidth={1.5} />}
+                  >
+                    {copiedLink ? t('copied') : t('copyShareLink')}
+                  </Button>
+                </div>
+
+                <a
+                  href={whatsappHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-5 py-2.5 text-sm font-bold text-emerald-800 transition hover:bg-emerald-100"
+                >
+                  <MessageCircle className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                  <span>{t('shareWhatsapp')}</span>
+                </a>
+              </div>
+            </section>
+          ) : (
+            <section className="rounded-2xl border border-amber-200/80 bg-amber-50/40 p-5 sm:p-6">
+              <div className="flex items-start gap-3.5">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-amber-700 ring-1 ring-amber-200/80">
+                  <Lock className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-base font-bold text-primary-950">{t('pendingListingLinkTitle')}</h2>
+                  <p className="mt-1 text-sm leading-relaxed text-slate-600">{t('pendingListingLinkBody')}</p>
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* My Lesson Requests */}
           <section className="space-y-4" aria-labelledby="tutor-requests-heading">
@@ -537,7 +659,10 @@ export function TutorDashboard() {
             </div>
 
             {visibleBookings.length === 0 ? (
-              <div className="rounded-3xl border border-dashed border-secondary-300 bg-secondary-50/60 px-6 py-10 text-center">
+              <div className="flex flex-col items-center rounded-2xl border border-dashed border-secondary-300 bg-secondary-50/50 px-6 py-10 text-center">
+                <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-500 ring-1 ring-secondary-200">
+                  <CalendarCheck className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+                </span>
                 <p className="text-sm font-semibold text-primary-950">{t('requestsEmpty')}</p>
               </div>
             ) : (
@@ -545,7 +670,7 @@ export function TutorDashboard() {
                 {visibleBookings.map((booking) => (
                   <article
                     key={booking.id}
-                    className="rounded-2xl border border-secondary-200 bg-white p-4 shadow-card sm:p-5"
+                    className="rounded-2xl border border-secondary-200 bg-white p-4 sm:p-5"
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex min-w-0 items-center gap-3">
@@ -581,19 +706,19 @@ export function TutorDashboard() {
                               const ok = await setBookingStatus(booking.id, 'declined');
                               if (ok) notify(t('toastDeclined'));
                             }}
-                            icon={<X className="h-4 w-4" aria-hidden="true" />}
+                            icon={<X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />}
                           >
                             {t('decline')}
                           </Button>
                           <Button
                             size="sm"
                             variant="primary"
-                            className="min-h-[44px] bg-primary-950 text-white"
+                            className="min-h-[44px] bg-[#121117] text-white"
                             onClick={async () => {
                               const ok = await setBookingStatus(booking.id, 'accepted');
                               if (ok) notify(t('toastAccepted'));
                             }}
-                            icon={<Check className="h-4 w-4" aria-hidden="true" />}
+                            icon={<Check className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />}
                           >
                             {t('accept')}
                           </Button>
@@ -608,54 +733,22 @@ export function TutorDashboard() {
         </div>
       )}
 
-      {/* TAB 2: PROFILE & VERIFICATION */}
+      {/* TAB 2: PROFILE & VERIFICATION (Structured Preply/Airbnb Settings List) */}
       {tab === 'profile' && (
-        <section className="grid grid-cols-2 gap-3 sm:gap-4 animate-fade-in" aria-label={t('tabProfileVerification')}>
-          {actionCards.map(({ key, title, desc, status, icon: Icon, tone, onOpen }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={onOpen}
-              className={`flex min-h-[128px] flex-col items-start justify-between rounded-2xl border p-4 text-start transition hover:-translate-y-0.5 hover:shadow-card-hover sm:p-5 ${
-                tone === 'danger'
-                  ? 'border-error-100 bg-error-50/40 hover:border-error-500/40'
-                  : 'border-secondary-200 bg-white shadow-card hover:border-primary-300'
-              }`}
-            >
-              <div className="flex w-full items-start justify-between gap-2">
-                <span
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                    tone === 'danger'
-                      ? 'bg-error-100 text-error-700'
-                      : tone === 'success'
-                        ? 'bg-success-50 text-success-700'
-                        : 'bg-primary-50 text-primary-600'
-                  }`}
-                >
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                </span>
-                {status && (
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                      tone === 'success'
-                        ? 'bg-success-50 text-success-700'
-                        : 'bg-secondary-100 text-slate-600'
-                    }`}
-                  >
-                    {tone === 'success' && <Check className="h-3 w-3" aria-hidden="true" />}
-                    {status}
-                  </span>
-                )}
-              </div>
+        <section className="space-y-7 animate-fade-in" aria-label={t('tabProfileVerification')}>
+          {renderSettingsGroup(t('sectionPublicListing'), publicSettingsRows)}
+          {renderSettingsGroup(t('sectionAccountVerification'), privateSettingsRows)}
 
-              <div className="mt-3 w-full">
-                <h3 className={`text-sm font-bold sm:text-base ${tone === 'danger' ? 'text-error-700' : 'text-primary-950'}`}>
-                  {title}
-                </h3>
-                <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{desc}</p>
-              </div>
+          <div className="flex justify-center pt-2">
+            <button
+              type="button"
+              onClick={() => setActiveModal('delete')}
+              className="inline-flex min-h-[44px] items-center gap-2 px-3 text-sm font-semibold text-error-600 underline-offset-4 transition hover:text-error-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error-500"
+            >
+              <Trash2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+              <span>{t('actionDeleteAccount')}</span>
             </button>
-          ))}
+          </div>
         </section>
       )}
 

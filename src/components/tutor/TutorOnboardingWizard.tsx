@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -52,6 +52,7 @@ export function TutorOnboardingWizard() {
     lang,
     t,
     user,
+    hasTutorProfile,
     loginWithPassword,
     registerWithPassword,
     resendVerificationEmail,
@@ -96,6 +97,12 @@ export function TutorOnboardingWizard() {
   const [copiedLink, setCopiedLink] = useState(false);
 
   const photoInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (user?.emailConfirmed && hasTutorProfile && !submittedTutor && !submitting) {
+      setRole('tutor');
+    }
+  }, [user?.emailConfirmed, hasTutorProfile, submittedTutor, submitting, setRole]);
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -576,51 +583,77 @@ export function TutorOnboardingWizard() {
             )}
           </div>
 
-          <div className="rounded-3xl border border-secondary-200 bg-secondary-50/70 p-6">
-            <div className="flex items-start gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-primary-600 ring-1 ring-secondary-200">
-                <Share2 className="h-5 w-5" aria-hidden="true" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-base font-bold text-primary-950">{t('shareInviteTitle')}</h3>
-                <p className="mt-1 text-xs leading-relaxed text-slate-600">{t('shareInviteHint')}</p>
+          {submittedTutor.verified ? (
+            <div className="rounded-3xl border border-secondary-200 bg-secondary-50/70 p-6">
+              <div className="flex items-start gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-primary-600 ring-1 ring-secondary-200">
+                  <Share2 className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base font-bold text-primary-950">{t('publicListingLinkTitle')}</h3>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-600">{t('publicListingLinkHint')}</p>
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-center gap-2 rounded-xl border border-secondary-200 bg-white px-3 py-2">
+                <input
+                  type="text"
+                  readOnly
+                  dir="ltr"
+                  value={shareUrl}
+                  aria-label={t('copyShareLink')}
+                  className="min-w-0 flex-1 bg-transparent text-xs text-slate-600 focus:outline-none"
+                />
+                <Button size="sm" variant="outline" onClick={handleCopy} icon={copiedLink ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}>
+                  {copiedLink ? t('copied') : t('copyShareLink')}
+                </Button>
+              </div>
+
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                <a
+                  href={whatsappHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full border border-success-500/30 bg-success-50 px-5 py-2.5 text-sm font-bold text-success-700 transition hover:bg-success-100"
+                >
+                  <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                  {t('shareWhatsapp')}
+                </a>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="flex-1 bg-primary-950 text-white"
+                  onClick={() => setRole('tutor')}
+                >
+                  {t('goToTutorDashboard')}
+                </Button>
               </div>
             </div>
+          ) : (
+            <div className="rounded-3xl border border-amber-200/80 bg-amber-50/40 p-6">
+              <div className="flex items-start gap-3.5">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-amber-700 ring-1 ring-amber-200/80">
+                  <Clock className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base font-bold text-primary-950">{t('pendingListingLinkTitle')}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{t('pendingListingLinkBody')}</p>
+                </div>
+              </div>
 
-            <div className="mt-4 flex items-center gap-2 rounded-xl border border-secondary-200 bg-white px-3 py-2">
-              <input
-                type="text"
-                readOnly
-                dir="ltr"
-                value={shareUrl}
-                aria-label={t('copyShareLink')}
-                className="min-w-0 flex-1 bg-transparent text-xs text-slate-600 focus:outline-none"
-              />
-              <Button size="sm" variant="outline" onClick={handleCopy} icon={copiedLink ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}>
-                {copiedLink ? t('copied') : t('copyShareLink')}
-              </Button>
+              <div className="mt-5">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  block
+                  className="min-h-[46px] bg-primary-950 text-white"
+                  onClick={() => setRole('tutor')}
+                >
+                  {t('goToTutorDashboard')}
+                </Button>
+              </div>
             </div>
-
-            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full border border-success-500/30 bg-success-50 px-5 py-2.5 text-sm font-bold text-success-700 transition hover:bg-success-100"
-              >
-                <MessageCircle className="h-4 w-4" aria-hidden="true" />
-                {t('shareWhatsapp')}
-              </a>
-              <Button
-                variant="primary"
-                size="lg"
-                className="flex-1 bg-primary-950 text-white"
-                onClick={() => setRole('tutor')}
-              >
-                {t('goToTutorDashboard')}
-              </Button>
-            </div>
-          </div>
+          )}
         </div>
       </section>
     );
