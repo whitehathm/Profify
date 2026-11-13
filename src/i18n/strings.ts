@@ -722,6 +722,11 @@ export const strings = {
     fr: 'Votre e-mail n’est pas encore confirmé. Cliquez sur le lien reçu puis réessayez.',
     en: 'Your email is not verified yet. Please click the verification link in your inbox, then try again.',
   },
+  errExperience: {
+    ar: 'اختر سنوات الخبرة',
+    fr: 'Choisissez vos années d’expérience',
+    en: 'Please select your years of experience',
+  },
 } satisfies Record<string, Localized>;
 
 export type StringKey = keyof typeof strings;

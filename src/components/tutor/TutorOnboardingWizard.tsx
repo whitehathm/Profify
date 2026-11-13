@@ -75,17 +75,17 @@ export function TutorOnboardingWizard() {
   const [resendingEmail, setResendingEmail] = useState(false);
   const [resendFeedback, setResendFeedback] = useState<string | null>(null);
 
-  // Wizard step & form state
+  // Wizard step & form state (start completely empty — no pre-selected defaults)
   const [step, setStep] = useState(1);
-  const [primaryLanguage, setPrimaryLanguage] = useState<string>('english');
-  const [specialties, setSpecialties] = useState<SpecialtyId[]>(['conversation']);
-  const [modes, setModes] = useState<TeachingMode[]>(['online']);
-  const [cityId, setCityId] = useState<string>('casablanca');
+  const [primaryLanguage, setPrimaryLanguage] = useState<string>('');
+  const [specialties, setSpecialties] = useState<SpecialtyId[]>([]);
+  const [modes, setModes] = useState<TeachingMode[]>([]);
+  const [cityId, setCityId] = useState<string>('');
   const [hourlyRate, setHourlyRate] = useState<number>(120);
-  const [offersFreeTrial, setOffersFreeTrial] = useState<boolean>(true);
+  const [offersFreeTrial, setOffersFreeTrial] = useState<boolean>(false);
   const [headline, setHeadline] = useState('');
   const [bio, setBio] = useState('');
-  const [experienceBand, setExperienceBand] = useState<ExperienceBand>('3-5');
+  const [experienceBand, setExperienceBand] = useState<ExperienceBand | ''>('');
   const [avatarPreview, setAvatarPreview] = useState<string>('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -130,11 +130,6 @@ export function TutorOnboardingWizard() {
 
       clearPendingTutorOnboarding();
       setPendingVerificationEmail('');
-      if (authName.trim() && !firstName) {
-        const [first, ...rest] = authName.trim().split(/\s+/);
-        setFirstName(first);
-        if (rest.length > 0) setLastName(rest.join(' '));
-      }
       notify(t('toastWelcome', { name: displayName }));
     } catch {
       setAuthFormError(t('authUnexpected'));
@@ -242,6 +237,10 @@ export function TutorOnboardingWizard() {
         setStepError(t('errTutorBio'));
         return false;
       }
+      if (!experienceBand) {
+        setStepError(t('errExperience'));
+        return false;
+      }
     }
     if (step === 6) {
       if (firstName.trim().length < 2 || lastName.trim().length < 2) {
@@ -255,6 +254,14 @@ export function TutorOnboardingWizard() {
     }
     return true;
   };
+
+  const canContinue = (() => {
+    if (step === 1) return Boolean(primaryLanguage) && specialties.length > 0;
+    if (step === 2) return modes.length > 0 && (!modes.includes('in_person') || Boolean(cityId));
+    if (step === 3) return Number.isFinite(hourlyRate) && hourlyRate >= MIN_RATE && hourlyRate <= 2000;
+    if (step === 4) return headline.trim().length >= 6 && bio.trim().length >= 20 && Boolean(experienceBand);
+    return true;
+  })();
 
   const handleNext = () => {
     if (!validateCurrentStep()) return;
@@ -273,7 +280,8 @@ export function TutorOnboardingWizard() {
     setSubmitting(true);
     setStepError(null);
 
-    const expBandMeta = EXPERIENCE_BANDS.find((band) => band.id === experienceBand) ?? EXPERIENCE_BANDS[1];
+    const resolvedExpBand: ExperienceBand = experienceBand || '1-2';
+    const expBandMeta = EXPERIENCE_BANDS.find((band) => band.id === resolvedExpBand) ?? EXPERIENCE_BANDS[0];
     const cleanFirst = firstName.trim();
     const cleanLast = lastName.trim();
     const cleanHeadline = headline.trim();
@@ -299,7 +307,7 @@ export function TutorOnboardingWizard() {
         published: false,
         modes,
         experienceYears: expBandMeta.years,
-        experienceBand,
+        experienceBand: resolvedExpBand,
         bio: { ar: cleanBio, fr: cleanBio, en: cleanBio },
         qualifications: specialties.map((id) => SPECIALTIES.find((item) => item.id === id)?.label ?? { ar: id, fr: id, en: id }),
         availableDays: [1, 2, 3, 4, 5, 6],
@@ -319,10 +327,10 @@ export function TutorOnboardingWizard() {
         whatsapp: formattedWhatsapp,
         specialties,
         offersFreeTrial,
-        experienceBand,
+        experienceBand: resolvedExpBand,
       });
 
-      await submitTutorApplication({
+      const appResult = await submitTutorApplication({
         tutorId: created.id,
         userId: user.id,
         firstName: cleanFirst,
@@ -336,14 +344,19 @@ export function TutorOnboardingWizard() {
         offersFreeTrial,
         headline: cleanHeadline,
         bio: cleanBio,
-        experienceBand,
+        experienceBand: resolvedExpBand,
         avatarUrl: avatarPreview,
         createdAt: new Date().toISOString(),
       });
 
+      if (!appResult.synced && appResult.errorMessage) {
+        console.error('[Profify] Application persisted locally; Supabase sync notice:', appResult.errorMessage);
+      }
+
       setSubmittedTutor(created);
       notify(t('tutorProfileSaved'));
-    } catch {
+    } catch (err) {
+      console.error('[Profify] Unexpected onboarding submission error:', err);
       setStepError(t('tutorSaveFailed'));
     } finally {
       setSubmitting(false);
@@ -932,7 +945,10 @@ export function TutorOnboardingWizard() {
                         key={band.id}
                         type="button"
                         aria-pressed={active}
-                        onClick={() => setExperienceBand(band.id)}
+                        onClick={() => {
+                          setExperienceBand(band.id);
+                          setStepError(null);
+                        }}
                         className={`min-h-[44px] rounded-xl border px-3 py-2.5 text-sm font-bold transition ${
                           active
                             ? 'border-primary-950 bg-primary-950 text-white shadow-sm'
@@ -1103,6 +1119,7 @@ export function TutorOnboardingWizard() {
               <Button
                 type="submit"
                 variant="primary"
+                disabled={!canContinue}
                 className="min-h-[44px] bg-primary-950 text-white"
               >
                 <span>{t('wizardContinue')}</span>

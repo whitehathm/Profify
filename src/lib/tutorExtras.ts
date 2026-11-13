@@ -100,7 +100,9 @@ export function clearTutorExtras(tutorId: string): void {
   }
 }
 
-export async function submitTutorApplication(payload: TutorApplicationPayload): Promise<{ synced: boolean }> {
+export async function submitTutorApplication(
+  payload: TutorApplicationPayload,
+): Promise<{ synced: boolean; errorMessage?: string }> {
   if (typeof window !== 'undefined') {
     try {
       const raw = window.localStorage.getItem(APPLICATIONS_KEY);
@@ -131,9 +133,14 @@ export async function submitTutorApplication(payload: TutorApplicationPayload): 
       experience_band: payload.experienceBand,
       avatar_url: payload.avatarUrl,
     });
-    return { synced: !error };
-  } catch {
-    return { synced: false };
+    if (error) {
+      console.error('[Profify] tutor_applications insert failed:', error);
+      return { synced: false, errorMessage: error.message };
+    }
+    return { synced: true };
+  } catch (err) {
+    console.error('[Profify] tutor_applications insert threw:', err);
+    return { synced: false, errorMessage: err instanceof Error ? err.message : 'Unknown error' };
   }
 }
 

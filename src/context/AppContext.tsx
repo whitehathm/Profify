@@ -213,6 +213,17 @@ function readCustomTutors(): Tutor[] {
     .filter((tutor) => !catalogIds.has(tutor.id));
 }
 
+function writeCustomTutors(list: Tutor[]): void {
+  if (typeof window === 'undefined') return;
+  const catalogIds = new Set(TUTORS.map((tutor) => tutor.id));
+  const customOnly = list.filter((tutor) => !catalogIds.has(tutor.id));
+  try {
+    window.localStorage.setItem(CUSTOM_TUTORS_STORAGE_KEY, JSON.stringify(customOnly));
+  } catch {
+    // Ignore storage quota errors cleanly.
+  }
+}
+
 const LANG_STORAGE_KEY = 'profify:lang:v1';
 
 function readInitialLang(): Lang {
@@ -347,7 +358,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
   const [modal, setModal] = useState<ModalState>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const tutorFallback = supabase ? [...TUTORS] : [...TUTORS, ...readCustomTutors()];
+  const tutorFallback = [...readCustomTutors(), ...TUTORS];
   const bookingFallback = supabase
     ? SEED_BOOKINGS
     : readStorageArray(BOOKINGS_STORAGE_KEY, SEED_BOOKINGS, isBookingArray);
@@ -358,7 +369,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     data: tutors = tutorFallback,
     mutate: mutateTutors,
   } = useSWR<Tutor[]>(tutorsKey, async () => {
-    if (!supabase) return [...TUTORS, ...readCustomTutors()];
+    const localCustom = readCustomTutors();
+    if (!supabase) return [...localCustom, ...TUTORS];
 
     const publicColumns = 'id, name, headline, avatar, city_id, subject_ids, price_per_hour, rating, review_count, verified, published, modes, experience_years, bio, qualifications, available_days, slots, reviews';
     const columns = user ? `${publicColumns}, owner_id` : publicColumns;
@@ -367,12 +379,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .select(columns)
       .order('created_at', { ascending: false });
 
-    if (error || !data?.length) return [...TUTORS];
+    if (error || !data?.length) return [...localCustom, ...TUTORS];
 
     const remoteTutors = (data as unknown as TutorRow[]).map(tutorFromRow);
     const seedIds = new Set(TUTORS.map((tutor) => tutor.id));
     const liveTutors = remoteTutors.filter((tutor) => !seedIds.has(tutor.id));
-    return [...liveTutors, ...TUTORS];
+    const liveIds = new Set(liveTutors.map((tutor) => tutor.id));
+    const fallbackCustom = localCustom.filter((tutor) => !liveIds.has(tutor.id));
+    return [...fallbackCustom, ...liveTutors, ...TUTORS];
   }, {
     fallbackData: tutorFallback,
     revalidateOnFocus: true,
@@ -588,10 +602,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addTutor = useCallback(async (profile: Omit<Tutor, 'id'>): Promise<Tutor | null> => {
-    const tutor: Tutor = { ...profile, id: makeId('tutor'), ownerId: user?.id ?? null };
+    let ownerId = user?.id ?? null;
+    if (supabase && !ownerId) {
+      try {
+        const { data } = await supabase.auth.getUser();
+        ownerId = data.user?.id ?? null;
+      } catch {
+        ownerId = null;
+      }
+    }
+
+    const tutor: Tutor = { ...profile, id: makeId('tutor'), ownerId };
+    let syncedRemote = false;
+
     if (supabase) {
-      const { error } = await supabase.from('tutors').insert(tutorToRow(tutor, user?.id ?? null));
-      if (error) return null;
+      try {
+        const { error } = await supabase.from('tutors').insert(tutorToRow(tutor, ownerId));
+        if (error) {
+          console.error('[Profify] Supabase tutors insert failed, saving locally:', error);
+        } else {
+          syncedRemote = true;
+        }
+      } catch (err) {
+        console.error('[Profify] Supabase tutors insert threw, saving locally:', err);
+      }
+    }
+
+    if (!syncedRemote) {
+      writeCustomTutors([tutor, ...readCustomTutors().filter((item) => item.id !== tutor.id)]);
     }
 
     await mutateTutors((current = []) => [tutor, ...current.filter((item) => item.id !== tutor.id)], { revalidate: false });
@@ -611,12 +649,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
           delete row.owner_id;
           const { error } = await supabase.from('tutors').update(row).eq('id', id);
           if (error) {
-            notify(t('tutorSaveFailed'));
-            return;
+            console.error('[Profify] Supabase tutors update failed, updating locally:', error);
           }
         }
+        const localCustom = readCustomTutors();
+        if (localCustom.some((item) => item.id === id)) {
+          writeCustomTutors(localCustom.map((item) => (item.id === id ? updated : item)));
+        }
         void mutateTutors((current = []) => current.map((tutor) => (tutor.id === id ? updated : tutor)), { revalidate: false });
-      } catch {
+      } catch (err) {
+        console.error('[Profify] updateTutor failed:', err);
         notify(t('tutorSaveFailed'));
       }
     };
@@ -633,6 +675,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         // Fall through to local removal.
       }
     }
+    writeCustomTutors(readCustomTutors().filter((item) => item.id !== id));
     await mutateTutors((current = []) => current.filter((tutor) => tutor.id !== id), { revalidate: false });
   }, [tutors, user, mutateTutors]);
 
