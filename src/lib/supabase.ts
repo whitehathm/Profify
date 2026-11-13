@@ -1,6 +1,16 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
+function sanitizeSupabaseUrl(raw?: string): string {
+  const trimmed = raw?.trim() ?? '';
+  if (!trimmed) return '';
+  try {
+    return new URL(trimmed).origin;
+  } catch {
+    return trimmed.replace(/\/+$/, '');
+  }
+}
+
+const supabaseUrl = sanitizeSupabaseUrl(import.meta.env.VITE_SUPABASE_URL);
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
 const sharedGlobal = globalThis as typeof globalThis & { __profifySupabaseClient?: SupabaseClient | null };
 
